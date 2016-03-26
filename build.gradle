@@ -57,10 +57,10 @@ project(":desktop") {
 
     cmd = "git rev-parse --short HEAD"
     proc = cmd.execute()
-    project.ext.rev = proc.text.trim()
+    project.ext.rev = "Win" //proc.text.trim()
 
-    cmd = "uname -snmr"
-    proc = cmd.execute()
+   // cmd = "uname -snmr"
+   // proc = cmd.execute()
     project.ext.system = proc.text.trim()
 
     cmd = "whoami"

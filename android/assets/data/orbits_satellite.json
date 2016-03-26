@@ -3,14 +3,40 @@
 	{
 		"name" : "Gaia orbit",
 		"color" : [1.0, 1.0, 0.7, 0.5],
-		"ct" : Orbits,
+		"ct" : "Orbits",
 		
 		"parent" : "Gaia", 
 		"impl" : "gaia.cu9.ari.gaiaorbit.scenegraph.HeliotropicOrbit",
 		"provider" : "gaia.cu9.ari.gaiaorbit.data.orbit.OrbitFileDataProvider",
 			
 		"orbit" 		: {
-							"source" : "data/orb.GAIA.dat",
+							"source" : "data/orb.GAIA.dat"
 							}
+	},
+        {
+		"name" : "Cassini orbit",
+		"color" : [1.0, 0.3, 0.3, 0.7],
+		"ct" : "Orbits",
+		
+		"parent" : "Sol", 
+		"impl" : "gaia.cu9.ari.gaiaorbit.scenegraph.EclipticOrbit",
+		"provider" : "gaia.cu9.ari.gaiaorbit.data.orbit.OrbitFileDataEclipticJulianTimeProvider",
+			
+		"orbit" 		: {
+                                            "source" : "data/cassini.xyz"
+					  }
+	},
+        {
+		"name" : "Rosetta orbit",
+		"color" : [0.2, 1.0, 0.3, 0.7],
+		"ct" : "Orbits",
+		
+		"parent" : "Sol", 
+		"impl" : "gaia.cu9.ari.gaiaorbit.scenegraph.EclipticOrbit",
+		"provider" : "gaia.cu9.ari.gaiaorbit.data.orbit.OrbitFileDataEclipticJulianTimeProvider",
+			
+		"orbit" 		: {
+                                            "source" : "data/rosetta.xyz"
+					  }
 	}
 ]}

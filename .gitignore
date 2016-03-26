@@ -67,3 +67,4 @@ pickled_dict
 # Gradle cache #
 ################
 **/.gradle
+/.nb-gradle/

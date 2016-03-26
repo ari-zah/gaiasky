@@ -54,7 +54,6 @@ public class HYGBinaryLoader extends AbstractCatalogLoader implements ISceneGrap
             try {
                 // Read size of stars
                 int size = data_in.readInt();
-
                 for (int idx = 0; idx < size; idx++) {
                     try {
                         // name_length, name, appmag, absmag, colorbv, ra, dec, dist

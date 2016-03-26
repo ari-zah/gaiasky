@@ -29,5 +29,49 @@
 						"args" : [true],
 						"model" : "data/models/gaia/gaia.g3db"
 						}
+	},
+        {
+	"name" : "Cassini",
+	"color" : [1.0, .8, .0, 1.0],
+	// 3.5m of radius, 0.0035 Km
+	"size" : 0.0035,
+	"ct" : Satellites,
+
+	"mag" : 3.78,
+	
+	"parent" : "Sol", 
+	"impl" : "gaia.cu9.ari.gaiaorbit.scenegraph.Spacecraft",
+
+	"coordinates" : {
+				// This must implement gaia.cu9.ari.gaiaorbit.util.coord.IBodyCoordinates				
+				"impl" : "gaia.cu9.ari.gaiaorbit.util.coord.EclipticCoordinates",
+                                "orbitname" : "Cassini orbit"
+				},
+	"model"	: {
+                    "args" : [true],
+                    "model" : "data/models/cassini/cassini.g3db"
+                  }
+	},
+        {
+	"name" : "Rosetta",
+	"color" : [1.0, .8, .0, 1.0],
+	// 3.4m of radius, 0.0034 Km
+	"size" : 0.0034,
+	"ct" : Satellites,
+
+	"mag" : 3.78,
+	
+	"parent" : "Sol", 
+	"impl" : "gaia.cu9.ari.gaiaorbit.scenegraph.Spacecraft",
+
+	"coordinates" : {
+				// This must implement gaia.cu9.ari.gaiaorbit.util.coord.IBodyCoordinates				
+				"impl" : "gaia.cu9.ari.gaiaorbit.util.coord.EclipticCoordinates",
+                                "orbitname" : "Rosetta orbit"
+				},
+	"model"	: {
+                    "args" : [true],
+                    "model" : "data/models/rosetta/rosetta.g3db"
+                  }
 	}
 ]}

@@ -589,15 +589,19 @@ public class AstroUtils {
     public static double obliquity(double julianDate) {
         // JPL's fundamental ephemerides have been continually updated. The Astronomical Almanac for 2010 specifies:
         // E = 23° 26′ 21″.406 − 46″.836769 T − 0″.0001831 T2 + 0″.00200340 T3 − 0″.576×10−6 T4 − 4″.34×10−8 T5
+        
         double T = T(julianDate);
-        double T2 = T * T;
+/*        double T2 = T * T;
         double T3 = T2 * T;
         double T4 = T3 * T;
         double T5 = T4 * T;
 
-        double todeg = 1 / 3600;
+        double todeg = 1.0 / 3600.0;
 
-        return 23 + 26 / 60 + 21.406 * todeg - 46.836769 * todeg * T - 0.0001831 * todeg * T2 + 0.00200340 * todeg * T3 - 0.576e-6 * todeg * T4 - 4.34e-8 * todeg * T5;
+        return 23.0 + 26.0 / 60.0 + 21.406 * todeg - 46.836769 * todeg * T - 0.0001831 * todeg * T2 + 0.00200340 * todeg * T3 - 0.576e-6 * todeg * T4 - 4.34e-8 * todeg * T5;
+  */      
+        return 23.0 + 26.0 / 60.0 
+                + ( 21.406 - ( 46.836769 - ( 0.0001831 + ( 0.00200340 - ( 0.576e-6 - 4.34e-8 * T ) * T ) * T ) * T ) * T ) / 3600.0;
     }
 
     /**
@@ -612,4 +616,5 @@ public class AstroUtils {
     public static double tau(double julianDate) {
         return (julianDate - 2451545) / 365250;
     }
+    
 }

@@ -5,6 +5,7 @@ sourceCompatibility = 1.7
 sourceSets.main.java.srcDirs = ["src/"]
 
 project.ext.mainClassName = "gaia.cu9.ari.gaiaorbit.desktop.GaiaSandboxDesktop"
+//project.ext.mainClass = "gaia.cu9.ari.gaiaorbit.desktop.GaiaSandboxDesktop"
 project.ext.assetsDir = new File("../android/assets");
 project.ext.workDir = new File(".");
 
@@ -18,6 +19,24 @@ sourceSets {
             output.resourcesDir = project.assetsDir.absolutePath
         }
     }
+}
+
+task debug(dependsOn: classes, type: JavaExec, description: "Debug the desktop project") {
+    main = project.mainClassName
+    systemProperties['properties.file'] = '../android/assets/conf/global.properties'
+    systemProperties['assets.location'] = '../android/assets/'
+    	
+    // Parallel GC
+    //jvmArgs = ['-Xms2g', '-Xmx4g', '-XX:+UseParallelGC']
+    // CMS GC
+    jvmArgs = ['-Xms2g', '-Xmx4g', '-XX:+UseConcMarkSweepGC']
+    // G1 GC
+    //jvmArgs = ['-Xms2g', '-Xmx4g', '-XX:+UseG1GC']
+    classpath = sourceSets.main.runtimeClasspath
+    classpath += files(project.assetsDir)
+    standardInput = System.in
+    workingDir = project.workDir
+    debug = true
 }
 
 task run(dependsOn: jar, type: JavaExec, description: "Runs the desktop project") {
