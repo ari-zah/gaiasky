@@ -34,7 +34,7 @@ public class KeyBindings {
         }
     }
 
-    public static int SPECIAL1, SPECIAL2;
+    public static int SPECIAL1, SPECIAL2, SPECIAL3;
 
     /**
      * Creates a key mappings instance.
@@ -44,6 +44,7 @@ public class KeyBindings {
         // Init special keys
         SPECIAL1 = Keys.CONTROL_LEFT;
         SPECIAL2 = Keys.SHIFT_LEFT;
+        SPECIAL3 = Keys.ALT_LEFT;
         // For now this will do
         initDefault();
     }
@@ -181,6 +182,14 @@ public class KeyBindings {
                 EventManager.instance.post(Events.TOGGLE_VISIBILITY_CMD, "element.meshes", false);
             }
         }), SPECIAL2, Keys.H);
+
+        // SHIFT+V -> Toggle clusters
+        addMapping(new ProgramAction(txt("action.toggle", txt("element.clusters")), new Runnable() {
+            @Override
+            public void run() {
+                EventManager.instance.post(Events.TOGGLE_VISIBILITY_CMD, "element.clusters", false);
+            }
+        }), SPECIAL2, Keys.V);
 
         // Left bracket -> divide speed
         addMapping(new ProgramAction(txt("action.dividetime"), new Runnable() {
@@ -417,6 +426,29 @@ public class KeyBindings {
             }
         }), Keys.TAB);
 
+        // CTRL + ALT + S -> Spacecraft at current position
+        addMapping(new ProgramAction("Spacecraft at current cam pos", new Runnable() {
+            @Override
+            public void run() {
+                EventManager.instance.post(Events.SPACECRAFT_POS_CAM);
+            }
+        }), SPECIAL1, SPECIAL3, Keys.S);
+
+        // CTRL + ALT + B -> Spacecraft at current position
+        addMapping(new ProgramAction("Spacecraft behind cam", new Runnable() {
+            @Override
+            public void run() {
+                EventManager.instance.post(Events.SPACECRAFT_BACK_CAM);
+            }
+        }), SPECIAL1, SPECIAL3, Keys.B);
+
+        // CTRL + ALT + F -> Spacecraft at current position
+        addMapping(new ProgramAction("Spacecraft front cam", new Runnable() {
+            @Override
+            public void run() {
+                EventManager.instance.post(Events.SPACECRAFT_FRONT_CAM);
+            }
+        }), SPECIAL1, SPECIAL3, Keys.F);
     }
 
     /**

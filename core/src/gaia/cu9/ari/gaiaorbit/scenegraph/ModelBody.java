@@ -108,8 +108,9 @@ public abstract class ModelBody extends CelestialBody {
             IStarFocus sf = camera.getClosestStar();
             if (sf != null) {
                 float[] col = sf.getClosestCol();
+                float brightness = (float) MathUtilsd.lint(sf.getClosestDist(), 0, 500 * Constants.PC_TO_U, 1f, 0.1f);
                 mc.dlight.direction.sub(sf.getClosestPos(aux3d1.get()).put(aux3f1.get()));
-                mc.dlight.color.set(col[0], col[1], col[2], 1.0f);
+                mc.dlight.color.set(col[0] * brightness, col[1] * brightness, col[2] * brightness, 1f);
             } else {
                 Vector3d campos = camera.getPos();
                 mc.dlight.direction.add((float) campos.x, (float) campos.y, (float) campos.z);

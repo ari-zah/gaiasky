@@ -1,0 +1,8 @@
+{ "data" : [
+	{
+		"loader": gaia.cu9.ari.gaiaorbit.data.JsonLoader,
+		"files": [  
+					"data/satellites2.json",
+					]
+	}
+]}

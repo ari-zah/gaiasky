@@ -117,11 +117,12 @@ public class Spacecraft extends GenericSpacecraft implements ILineRenderable, IO
         vel = new Vector3d();
 
         // orientation
+        pos.set(0, 0, 1);
         direction = new Vector3d(1, 0, 0);
         up = new Vector3d(0, 1, 0);
         dirup = new Pair<Vector3d, Vector3d>(direction, up);
 
-        posf = new Vector3();
+        posf = new Vector3(0, 0, 1);
         directionf = new Vector3(1, 0, 0);
         upf = new Vector3(0, 1, 0);
 
@@ -330,7 +331,8 @@ public class Spacecraft extends GenericSpacecraft implements ILineRenderable, IO
     public void updateLocalValues(ITimeFrameProvider time, ICamera camera) {
         if (yawv != 0 || pitchv != 0 || rollv != 0 || vel.len2() != 0 || render) {
             // We use the simulation time for the integration
-            double dt = time.getDt() * Constants.H_TO_S;
+            //double dt = time.getDt() * Constants.H_TO_S;
+            double dt = Gdx.graphics.getDeltaTime();
             // Poll keys
             pollKeys(Gdx.graphics.getDeltaTime());
 
@@ -408,7 +410,7 @@ public class Spacecraft extends GenericSpacecraft implements ILineRenderable, IO
 
     protected void stopAllMovement() {
         setEnginePower(0);
-        //vel.set(0, 0, 0);
+        //vel.setZero();
 
         setYawPower(0);
         setPitchPower(0);
@@ -562,7 +564,7 @@ public class Spacecraft extends GenericSpacecraft implements ILineRenderable, IO
         ICamera cam = GaiaSky.instance.getICamera();
         prepareShadowEnvironment();
         mc.touch();
-        mc.setTransparency(alpha * fadeOpacity);
+        mc.setTransparency(alpha);
         if (cam.getMode().isSpacecraft())
             // In Spacecraft mode, we are not affected by relativistic aberration or Doppler shift
             mc.updateRelativisticEffects(cam, 0);
@@ -576,7 +578,7 @@ public class Spacecraft extends GenericSpacecraft implements ILineRenderable, IO
     public void renderOpaque(ModelBatch modelBatch, float alpha, double t) {
         ICamera cam = GaiaSky.instance.getICamera();
         mc.touch();
-        mc.setTransparency(alpha * fadeOpacity);
+        mc.setTransparency(alpha);
         if (cam.getMode().isSpacecraft())
             // In Spacecraft mode, we are not affected by relativistic aberration or Doppler shift
             mc.updateRelativisticEffects(cam, 0);

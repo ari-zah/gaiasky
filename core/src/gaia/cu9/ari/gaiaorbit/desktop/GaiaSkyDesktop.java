@@ -193,8 +193,8 @@ public class GaiaSkyDesktop implements IObserver {
         cfg.height = GlobalConf.screen.getScreenHeight();
         cfg.samples = 0;
         cfg.vSyncEnabled = GlobalConf.screen.VSYNC;
-        cfg.foregroundFPS = 0;
-        cfg.backgroundFPS = 0;
+        cfg.foregroundFPS = 60;
+        cfg.backgroundFPS = 30;
         cfg.useHDPI = true;
         cfg.addIcon("icon/ic_launcher.png", Files.FileType.Internal);
 

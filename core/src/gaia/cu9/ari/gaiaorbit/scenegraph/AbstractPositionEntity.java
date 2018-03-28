@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector3;
 import gaia.cu9.ari.gaiaorbit.render.I3DTextRenderable;
 import gaia.cu9.ari.gaiaorbit.render.RenderingContext;
 import gaia.cu9.ari.gaiaorbit.render.RenderingContext.CubemapSide;
+import gaia.cu9.ari.gaiaorbit.util.Constants;
 import gaia.cu9.ari.gaiaorbit.util.DecalUtils;
 import gaia.cu9.ari.gaiaorbit.util.GlobalResources;
 import gaia.cu9.ari.gaiaorbit.util.Logger;
@@ -211,7 +212,10 @@ public abstract class AbstractPositionEntity extends SceneGraphNode {
     @Override
     public void updateLocal(ITimeFrameProvider time, ICamera camera) {
         updateLocalValues(time, camera);
-
+        if (this.name.equals("Solar sail")) {
+            pos.set(0, 0, 0.0012125);
+            size = (float) (10 * Constants.M_TO_U);
+        }
         this.transform.translate(pos);
 
         Vector3d aux = aux3d1.get();

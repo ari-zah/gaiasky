@@ -238,6 +238,7 @@ public class ModelComponent implements Disposable, IObserver {
     }
 
     public void setTransparency(float alpha) {
+        alpha = 1;
         if (instance != null) {
             int n = instance.materials.size;
             for (int i = 0; i < n; i++) {

@@ -350,7 +350,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
             this.pos.set(fccopy.transform.getTranslation());
 
             this.pos.add(0, 0, entity1.getRadius() * 5);
-            this.posinv.set(this.pos).scl(-1);
+            //this.posinv.set(this.pos).scl(-1);
             this.direction.set(0, 0, -1);
             this.up.set(0, 1, 0);
             closest = entity1;
@@ -438,14 +438,16 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     protected void updatePerspectiveCamera() {
         double closestStarDist = closestStar == null ? Double.MAX_VALUE : closestStar.getClosestDist();
         if (closest != null) {
-            camera.near = (float) Math.min(CAM_NEAR, Math.min(closest.distToCamera - closest.getRadius(), closestStarDist) / 3);
+            camera.near = (float) Math.min(CAM_NEAR, Math.min(closest.distToCamera - closest.getRadius(), closestStarDist)) * 0.0002f;
+            camera.far = 1f;
         }
-        camera.position.set(0f, 0f, 0f);
+        camera.position.set(pos.valuesf());
         camera.direction.set(direction.valuesf());
         camera.up.set(up.valuesf());
+        //camera.fieldOfView = 4.9f;
         camera.update();
 
-        posinv.set(pos).scl(-1);
+        //posinv.set(pos).scl(-1);
 
     }
 
@@ -750,7 +752,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
             lastvel.set(vel);
             force.setZero();
         }
-        posinv.set(pos).scl(-1);
+        //posinv.set(pos).scl(-1);
     }
 
     /**
@@ -945,7 +947,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
         } else {
             dist = distance;
         }
-        return dist > 0 ? dist * GlobalConf.scene.CAMERA_SPEED : 0;
+        return (dist > 0 ? dist * GlobalConf.scene.CAMERA_SPEED : 0) * 0.001d;
     }
 
     /**
@@ -961,7 +963,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
         } else {
             dist = distance;
         }
-        return Math.max(2000, Math.min(dist * Constants.U_TO_KM, GlobalConf.scene.ROTATION_SPEED));
+        return Math.max(2000, Math.min(dist * Constants.U_TO_KM, GlobalConf.scene.ROTATION_SPEED)) * 1000;
     }
 
     @Override
@@ -1010,7 +1012,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
             break;
         case CAMERA_POS_CMD:
             pos.set((double[]) data[0]);
-            posinv.set(pos).scl(-1d);
+            //posinv.set(pos).scl(-1d);
             break;
         case CAMERA_DIR_CMD:
             direction.set((double[]) data[0]);
@@ -1051,8 +1053,8 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
                         f.getAbsolutePosition(aux1);
                         pos.set(aux1);
 
-                        pos.add(0, 0, -f.getSize() * 3);
-                        posinv.set(pos).scl(-1);
+                        pos.add(0, 0, -f.getSize() * 105);
+                        //posinv.set(pos).scl(-1);
                         direction.set(0, 0, 1);
                         up.set(0, 1, 0);
                         rotate(up, 0.01);
@@ -1217,7 +1219,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
                 pos.set(aux1);
 
                 pos.add(0, 0, -this.focus.getSize() * 6);
-                posinv.set(pos).scl(-1);
+                //posinv.set(pos).scl(-1);
                 direction.set(0, 0, 1);
             }
         }

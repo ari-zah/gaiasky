@@ -649,8 +649,12 @@ public class SpacecraftGui extends AbstractGui {
             pitchvel.setText(nf.format(p) + "°");
             rollvel.setText(nf.format(r) + "°");
 
-            Pair<Double, String> velstr = GlobalResources.doubleToVelocityString(v);
-            mainvel.setText(sf.format(velstr.getFirst()) + " " + velstr.getSecond());
+            if (GlobalConf.runtime.RELATIVISTIC_ABERRATION) {
+                mainvel.setText(nf.format(v * Constants.U_TO_C) + " c");
+            } else {
+                Pair<Double, String> velstr = GlobalResources.doubleToVelocityString(v);
+                mainvel.setText(sf.format(velstr.getFirst()) + " " + velstr.getSecond());
+            }
 
             thrustfactor.setText("x" + (thf > 1000 ? sf.format(thf) : nf.format(thf)));
 

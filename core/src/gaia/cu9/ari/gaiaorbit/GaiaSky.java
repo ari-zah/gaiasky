@@ -398,7 +398,7 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
 
         // Set focus to Earth
         EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Focus);
-        EventManager.instance.post(Events.FOCUS_CHANGE_CMD, sg.getNode("Earth"), true);
+        EventManager.instance.post(Events.FOCUS_CHANGE_CMD, sg.getNode("Solar sail"), true);
         EventManager.instance.post(Events.GO_TO_OBJECT_CMD);
 
         initialized = true;
@@ -541,7 +541,8 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
                     renderGui(loadingGui);
                 }
             } else {
-
+                //GlobalConf.scene.OCTANT_THRESHOLD_0 = (float) (1.d * MathUtilsd.degRad);
+                //GlobalConf.scene.OCTANT_THRESHOLD_1 = GlobalConf.scene.OCTANT_THRESHOLD_0 + 1.f * GlobalConf.scene.OCTANT_THRESHOLD_0;
                 // Asynchronous load of textures and resources
                 manager.update();
 

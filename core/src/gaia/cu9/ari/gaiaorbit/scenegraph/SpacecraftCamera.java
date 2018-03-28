@@ -114,7 +114,7 @@ public class SpacecraftCamera extends AbstractCamera implements IObserver {
         chh2 = crosshairTex.getHeight() / 2f;
 
         // Focus is changed from GUI
-        EventManager.instance.subscribe(this, Events.FOV_CHANGED_CMD, Events.SPACECRAFT_LOADED);
+        EventManager.instance.subscribe(this, Events.FOV_CHANGED_CMD, Events.SPACECRAFT_LOADED, Events.SPACECRAFT_POS_CAM, Events.SPACECRAFT_BACK_CAM, Events.SPACECRAFT_FRONT_CAM);
     }
 
     @Override
@@ -164,6 +164,7 @@ public class SpacecraftCamera extends AbstractCamera implements IObserver {
 
         // We use the simulation time for the integration
         double sdt = time.getDt() * Constants.H_TO_S;
+        sdt = dt;
 
         scthrust.set(sc.thrust);
         scforce.set(sc.force);
@@ -216,6 +217,7 @@ public class SpacecraftCamera extends AbstractCamera implements IObserver {
      */
     public void updateHard(double dt, ITimeFrameProvider time) {
         double sdt = time.getDt() * Constants.H_TO_S;
+        sdt = dt;
 
         // POSITION
         double tgfac = targetDistance * sc.sizeFactor / fovFactor;
@@ -325,6 +327,31 @@ public class SpacecraftCamera extends AbstractCamera implements IObserver {
             this.sc = (Spacecraft) data[0];
             this.targetDistance = sc.size * 3.5;
             this.relpos.set(targetDistance, targetDistance / 2, 0);
+            break;
+        case SPACECRAFT_POS_CAM:
+            Gdx.app.postRunnable(() -> {
+                ICamera cam = GaiaSky.instance.getICamera();
+                firstTime = false;
+                sc.pos.set(cam.getPos());
+                sc.direction.set(cam.getDirection());
+                sc.up.set(cam.getUp());
+                sc.stopAllMovement();
+                sc.vel.setZero();
+            });
+            break;
+        case SPACECRAFT_BACK_CAM:
+            Gdx.app.postRunnable(() -> {
+                ICamera cam = GaiaSky.instance.getICamera();
+                firstTime = false;
+                Vector3d offset = aux1.set(cam.getDirection()).nor().scl(-10 * sc.getRadius());
+                sc.pos.set(cam.getPos()).add(offset);
+                sc.direction.set(cam.getDirection());
+                sc.up.set(cam.getUp());
+                sc.vel.set(cam.getDirection()).nor().scl(18 * Constants.KM_TO_U);
+            });
+            break;
+        case SPACECRAFT_FRONT_CAM:
+            firstTime = false;
             break;
         default:
             break;

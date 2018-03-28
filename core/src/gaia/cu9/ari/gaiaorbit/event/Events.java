@@ -670,6 +670,13 @@ public enum Events {
     /** Broadcasts the new thrust index **/
     SPACECRAFT_THRUST_INFO,
 
+    /** Positions spacecraft at camera **/
+    SPACECRAFT_POS_CAM,
+    /** Positons spacecraft behind camera, same dir and some vel **/
+    SPACECRAFT_BACK_CAM,
+    /** Positions spacecraft in fron to camera, opposite dir and some vel **/
+    SPACECRAFT_FRONT_CAM,
+
     /**
      * Contains following info:
      * <ul>

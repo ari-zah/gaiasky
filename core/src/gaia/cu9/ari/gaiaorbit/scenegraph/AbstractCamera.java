@@ -58,6 +58,7 @@ public abstract class AbstractCamera implements ICamera {
      * The closest star to the camera
      */
     protected IStarFocus closestStar;
+    protected String cstarname = "";
 
     public AbstractCamera(CameraManager parent) {
         this.parent = parent;
@@ -280,8 +281,9 @@ public abstract class AbstractCamera implements ICamera {
     }
 
     public void setClosestStar(IStarFocus star) {
-        if (closestStar == null || closestStar.getClosestDist() > star.getClosestDist()) {
+        if (closestStar == null || cstarname.equals("Sol") || star.getCandidateName().equals("Sol")) {
             closestStar = star;
+            cstarname = "Sol";
         }
 
     }

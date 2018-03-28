@@ -90,6 +90,7 @@ public class Constants {
     /** Milliseconds to year **/
     public static final double MS_TO_Y = 1 / Y_TO_MS;
 
+
     /**
      * Speed of light in m/s
      */
@@ -104,6 +105,11 @@ public class Constants {
      * Speed of light in internal units per second
      */
     public static final double C_US = C * M_TO_U;
+
+    /**
+     * Internal units to c
+     */
+    public static final double U_TO_C = U_TO_M / C;
 
     /**
      * Solar radius in Km
