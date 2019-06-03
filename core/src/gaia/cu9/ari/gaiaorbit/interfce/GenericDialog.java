@@ -160,7 +160,6 @@ public abstract class GenericDialog extends CollapsibleWindow {
                 if (ievent.getType() == Type.keyUp) {
                     int key = ievent.getKeyCode();
                     switch (key) {
-                    case Keys.N:
                     case Keys.ESCAPE:
                         // Exit
                         cancel();
@@ -168,7 +167,6 @@ public abstract class GenericDialog extends CollapsibleWindow {
                             cancelRunnable.run();
                         me.hide();
                         return true;
-                    case Keys.Y:
                     case Keys.ENTER:
                         // Exit
                         accept();

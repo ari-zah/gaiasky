@@ -171,8 +171,8 @@ public class GaiaSkyDesktop implements IObserver {
 
             // Init global configuration
             ConfInit.initialize(new DesktopConfInit());
-            GlobalConf.screen.SCREEN_WIDTH = 1080;
-            GlobalConf.screen.SCREEN_HEIGHT = 1200;
+            GlobalConf.screen.SCREEN_WIDTH = 1496;
+            GlobalConf.screen.SCREEN_HEIGHT = 1780;
 
             // Reinitialize with user-defined locale
             I18n.initialize(Gdx.files.absolute(GlobalConf.ASSETS_LOC + File.separator + "i18n/gsbundle"));

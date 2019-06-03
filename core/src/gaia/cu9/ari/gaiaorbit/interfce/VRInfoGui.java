@@ -14,8 +14,6 @@ public class VRInfoGui extends AbstractGui {
     protected Container<Table> container;
     protected Table contents;
 
-    long lastUpdateTime;
-
     public VRInfoGui() {
         EventManager.instance.subscribe(this, Events.FOCUS_CHANGED);
     }
@@ -26,7 +24,7 @@ public class VRInfoGui extends AbstractGui {
         ui = new Stage(new ScreenViewport(), GlobalResources.spriteBatch);
         skin = GlobalResources.skin;
 
-        container = new Container<Table>();
+        container = new Container<>();
         container.setFillParent(true);
         container.bottom().right();
         container.padRight(200 - hoffset);

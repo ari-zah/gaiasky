@@ -1,14 +1,7 @@
 package gaia.cu9.ari.gaiaorbit.interfce;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-
 import gaia.cu9.ari.gaiaorbit.GaiaSky;
 import gaia.cu9.ari.gaiaorbit.event.EventManager;
 import gaia.cu9.ari.gaiaorbit.event.Events;
@@ -26,6 +19,8 @@ import gaia.cu9.ari.gaiaorbit.vr.VRContext.VRControllerButtons;
 import gaia.cu9.ari.gaiaorbit.vr.VRContext.VRDevice;
 import gaia.cu9.ari.gaiaorbit.vr.VRDeviceListener;
 
+import java.util.*;
+
 public class OpenVRListener implements VRDeviceListener {
     private static final Log logger = Logger.getLogger(OpenVRListener.class);
     
@@ -39,6 +34,7 @@ public class OpenVRListener implements VRDeviceListener {
     private Vector3d p0, p1;
 
     private boolean vrControllerHint = false;
+    private boolean vrInfoGui = false;
     private long lastDoublePress = 0l;
 
     private Set<Integer> pressedButtons;
@@ -133,15 +129,15 @@ public class OpenVRListener implements VRDeviceListener {
                 EventManager.instance.post(Events.DISPLAY_VR_CONTROLLER_HINT_CMD, false);
                 vrControllerHint = false;
                 lastDoublePress = TimeUtils.millis();
+            } else if (button == VRControllerButtons.B) {
+                vrInfoGui = !vrInfoGui;
+                EventManager.instance.post(Events.DISPLAY_VR_GUI_CMD, vrInfoGui);
             } else if (button == VRControllerButtons.SteamVR_Touchpad) {
                 // Change mode from free to focus and viceversa
                 CameraMode cm = cam.getMode().equals(CameraMode.Focus) ? CameraMode.Free_Camera : CameraMode.Focus;
                 // Stop
                 cam.clearVelocityVR();
                 EventManager.instance.post(Events.CAMERA_MODE_CMD, cm);
-            } else if (button == VRControllerButtons.B) {
-                // Toggle VR GUI
-                EventManager.instance.post(Events.DISPLAY_VR_GUI_CMD, "VR GUI");
             }
         }
     }

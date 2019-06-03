@@ -128,10 +128,10 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
                     aux1.set((float) star.data[0], (float) star.data[1], (float) star.data[2]);
                     double distanceCenter = aux1.sub(center).len() / (mw.getRadius() * 2f);
 
-                    float[] col = new float[] { (float) (rand.nextGaussian() * 0.02f) + 0.93f, (float) (rand.nextGaussian() * 0.02) + 0.8f, (float) (rand.nextGaussian() * 0.02) + 0.97f, rand.nextFloat() * 0.5f + 0.4f };
+                    float[] col = new float[] { (float) (rand.nextGaussian() * 0.02f) + 0.93f, (float) (rand.nextGaussian() * 0.02) + 0.8f, (float) (rand.nextGaussian() * 0.02) + 0.97f, rand.nextFloat() * 0.5f + 0.9f };
 
                     if (distanceCenter < 1f) {
-                        float add = (float) MathUtilsd.clamp(1f - distanceCenter, 0f, 1f) * 0.5f;
+                        float add = (float) MathUtilsd.clamp(1f - distanceCenter, 0f, 1f) * 0.2f;
                         col[0] = col[0] + add;
                         col[1] = col[1] + add;
                         col[2] = col[2] + add;
@@ -142,14 +142,14 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
                     col[2] = MathUtilsd.clamp(col[2], 0f, 1f);
 
                     // COLOR
-                    curr.vertices[curr.vertexIdx + curr.colorOffset] = Color.toFloatBits(col[0], col[1], col[2], col[3] * 0.8f);
+                    curr.vertices[curr.vertexIdx + curr.colorOffset] = Color.toFloatBits(col[0], col[1], col[2], col[3] * 0.9f);
 
                     // SIZE
-                    double starSize = 0;
+                    double starSize;
                     if (star.data.length > 3) {
-                        starSize = (star.data[3] * 3 + 1);
+                        starSize = (star.data[3] * 14f + 4.0f);
                     } else {
-                        starSize = (float) Math.abs(rand.nextGaussian()) * 8f + 1.0f;
+                        starSize = (float) Math.abs(rand.nextGaussian()) * 14f + 4.0f;
                     }
                     curr.vertices[curr.vertexIdx + additionalOffset] = (float) (starSize * density * 2);
                     curr.vertices[curr.vertexIdx + additionalOffset + 1] = 0.7f;
@@ -190,7 +190,7 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
                         } else {
                             texnum = rand.nextInt(4);
                         }
-                        quadsize = (float) ((qp.data.length > 3 ? (qp.data[3] + 0.7f) * .2e11f : (rand.nextFloat() + 1.0f) * 0.7e11f) * Constants.VR_SCALE);
+                        quadsize = (float) ((qp.data.length > 3 ? (qp.data[3] + 0.7f) : (rand.nextFloat() + 1.0f)) * .75e11* Constants.VR_SCALE);
                         alphamultiplier = MathUtilsd.lint(quadpointdist, 0, mw.size * 3, 6.0f, 1.0f);
 
                         rotaxis.set(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());

@@ -19,8 +19,6 @@ public class VRControllerInfoGui extends AbstractGui {
     protected Container<Table> container;
     protected Table contents;
 
-    long lastUpdateTime;
-
     public VRControllerInfoGui() {
     }
 

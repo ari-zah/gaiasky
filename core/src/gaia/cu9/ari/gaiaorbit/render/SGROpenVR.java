@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -110,7 +109,7 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
 
             // Controller objects
             vrDeviceToModel = GaiaSky.instance.getVRDeviceToModel();
-            controllerObjects = new Array<StubModel>(controllers.size);
+            controllerObjects = new Array<>(controllers.size);
             for (VRDevice controller : controllers) {
                 addVRController(controller);
             }
@@ -174,7 +173,7 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
             // Render scene
             sgr.renderScene(camera, t, rc);
             // Camera
-            camera.render(1080, 1200);
+            camera.render(1496, 1780);
 
             if (GlobalConf.runtime.DISPLAY_VR_GUI)
                 renderGui(infoGui.left());
@@ -198,7 +197,7 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
             // Render scene
             sgr.renderScene(camera, t, rc);
             // Camera
-            camera.render(1080, 1200);
+            camera.render(1496, 1780);
 
             if (GlobalConf.runtime.DISPLAY_VR_GUI)
                 renderGui(infoGui.right());

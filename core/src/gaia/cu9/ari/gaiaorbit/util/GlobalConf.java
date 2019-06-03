@@ -335,11 +335,11 @@ public class GlobalConf {
         public boolean DRAW_OCTREE;
         public boolean RELATIVISTIC_ABERRATION = false;
         public boolean GRAVITATIONAL_WAVES = false;
-        
+
         public boolean DISPLAY_VR_GUI = false;
 
         public RuntimeConf() {
-            EventManager.instance.subscribe(this, Events.LIMIT_MAG_CMD, Events.INPUT_ENABLED_CMD, Events.DISPLAY_GUI_CMD, Events.TOGGLE_UPDATEPAUSE, Events.TOGGLE_TIME_CMD, Events.RECORD_CAMERA_CMD, Events.GRAV_WAVE_START, Events.GRAV_WAVE_STOP);
+            EventManager.instance.subscribe(this, Events.LIMIT_MAG_CMD, Events.INPUT_ENABLED_CMD, Events.DISPLAY_GUI_CMD, Events.TOGGLE_UPDATEPAUSE, Events.TOGGLE_TIME_CMD, Events.RECORD_CAMERA_CMD, Events.GRAV_WAVE_START, Events.GRAV_WAVE_STOP, Events.DISPLAY_VR_GUI_CMD);
         }
 
         public void initialize(boolean dISPLAY_GUI, boolean uPDATE_PAUSE, boolean sTRIPPED_FOV_MODE, boolean tIME_ON, boolean iNPUT_ENABLED, boolean rECORD_CAMERA, float lIMIT_MAG_RUNTIME, boolean rEAL_TIME, boolean dRAW_OCTREE) {
@@ -374,6 +374,14 @@ public class GlobalConf {
                 } else {
                     // Toggle
                     DISPLAY_GUI = !DISPLAY_GUI;
+                }
+                break;
+            case DISPLAY_VR_GUI_CMD:
+                if (data.length > 1) {
+                    Boolean val = (Boolean) data[1];
+                    DISPLAY_VR_GUI = val;
+                } else {
+                    DISPLAY_VR_GUI = !DISPLAY_VR_GUI;
                 }
                 break;
             case TOGGLE_UPDATEPAUSE:
@@ -538,16 +546,16 @@ public class GlobalConf {
             case FRAME_OUTPUT_MODE_CMD:
                 Object newMode = data[0];
                 ScreenshotMode mode = null;
-                if(newMode instanceof String){
+                if (newMode instanceof String) {
                     try {
                         mode = ScreenshotMode.valueOf((String) newMode);
-                    }catch(IllegalArgumentException e){
+                    } catch (IllegalArgumentException e) {
                         logger.error("Given value is not a representation of ScreenshotMode (simple|redraw): '" + newMode + "'");
                     }
                 } else {
                     mode = (ScreenshotMode) newMode;
                 }
-                if(mode != null){
+                if (mode != null) {
                     FRAME_MODE = mode;
                 }
                 break;
@@ -772,8 +780,8 @@ public class GlobalConf {
             EventManager.instance.subscribe(this, Events.STEREOSCOPIC_CMD, Events.STEREO_PROFILE_CMD, Events.CUBEMAP360_CMD, Events.CUBEMAP_PROJECTION_CMD);
         }
 
-        public void initialize(boolean dISPLAY_TUTORIAL, String tUTORIAL_POINTER_SCRIPT_LOCATION, String tUTORIAL_SCRIPT_LOCATION, boolean sHOW_DEBUG_INFO, Instant lAST_CHECKED, String lAST_VERSION, String vERSION_CHECK_URL, String dATA_DESCRIPTOR_URL, String uI_THEME, String sCRIPT_LOCATION, int rEST_PORT, String lOCALE, boolean sTEREOSCOPIC_MODE, StereoProfile sTEREO_PROFILE, boolean cUBEMAP360_MODE, boolean dISPLAY_HUD, boolean dISPLAY_POINTER_COORDS,
-                boolean dISPLAY_DATASET_DIALOG, boolean nET_MASTER, boolean nET_SLAVE, List<String> nET_MASTER_SLAVES) {
+        public void initialize(boolean dISPLAY_TUTORIAL, String tUTORIAL_POINTER_SCRIPT_LOCATION, String tUTORIAL_SCRIPT_LOCATION, boolean sHOW_DEBUG_INFO, Instant lAST_CHECKED, String lAST_VERSION, String vERSION_CHECK_URL, String dATA_DESCRIPTOR_URL, String uI_THEME, String sCRIPT_LOCATION, int rEST_PORT, String lOCALE, boolean sTEREOSCOPIC_MODE, StereoProfile sTEREO_PROFILE, boolean cUBEMAP360_MODE, boolean dISPLAY_HUD, boolean dISPLAY_POINTER_COORDS, boolean dISPLAY_DATASET_DIALOG,
+                boolean nET_MASTER, boolean nET_SLAVE, List<String> nET_MASTER_SLAVES) {
             DISPLAY_TUTORIAL = dISPLAY_TUTORIAL;
             TUTORIAL_POINTER_SCRIPT_LOCATION = tUTORIAL_POINTER_SCRIPT_LOCATION;
             TUTORIAL_SCRIPT_LOCATION = tUTORIAL_SCRIPT_LOCATION;
@@ -1199,7 +1207,7 @@ public class GlobalConf {
                     state = (Boolean) data[2];
                 }
                 ComponentType ct = ComponentType.getFromKey(key);
-                if(ct != null) {
+                if (ct != null) {
                     VISIBILITY[ct.ordinal()] = (state != null ? state : !VISIBILITY[ct.ordinal()]);
                 }
                 break;
@@ -1344,8 +1352,7 @@ public class GlobalConf {
     /**
      * Initialises the properties
      */
-    public static void initialize(VersionConf vc, ProgramConf pc, SceneConf sc, DataConf dc, RuntimeConf rc, PostprocessConf ppc, PerformanceConf pfc, FrameConf fc, ScreenConf scrc,
-            ScreenshotConf shc, ControlsConf cc, SpacecraftConf scc) throws Exception {
+    public static void initialize(VersionConf vc, ProgramConf pc, SceneConf sc, DataConf dc, RuntimeConf rc, PostprocessConf ppc, PerformanceConf pfc, FrameConf fc, ScreenConf scrc, ScreenshotConf shc, ControlsConf cc, SpacecraftConf scc) throws Exception {
         if (!initialized) {
             if (configurations == null) {
                 configurations = new ArrayList<IConf>();
