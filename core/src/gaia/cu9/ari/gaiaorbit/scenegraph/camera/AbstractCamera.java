@@ -25,9 +25,9 @@ public abstract class AbstractCamera implements ICamera {
     protected static final Log logger = Logger.getLogger(AbstractCamera.class);
 
     /** Camera far value **/
-    public static final double CAM_FAR = 1e7 * Constants.PC_TO_U;
+    public static final double CAM_FAR = 1e11 * Constants.PC_TO_U;
     /** Camera near values **/
-    public static final double CAM_NEAR = 2e4 * Constants.KM_TO_U;
+    public static final double CAM_NEAR = 1e7 * Constants.KM_TO_U;
 
     private static Matrix4d invProjectionView = new Matrix4d();
 

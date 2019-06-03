@@ -50,7 +50,7 @@ public class LoadingGui extends AbstractGui {
 
     @Override
     public void initialize(AssetManager assetManager) {
-        interfaces = new Array<IGuiInterface>();
+        interfaces = new Array<>();
         float pad30 = 30 * GlobalConf.SCALE_FACTOR;
         float pad10 = 10 * GlobalConf.SCALE_FACTOR;
         // User interface
@@ -70,7 +70,7 @@ public class LoadingGui extends AbstractGui {
         bottom.right().bottom();
         bottom.pad(pad10);
 
-        FileHandle gslogo = Gdx.files.internal("img/gaiasky-logo.png");
+        FileHandle gslogo = Gdx.files.internal("img/gaiasky-vr-logo.png");
         Texture logotex = new Texture(gslogo);
         logotex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         Image logoimg = new Image(logotex);

@@ -468,7 +468,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     protected void updatePerspectiveCamera() {
         double closestStarDist = closestStar == null ? Double.MAX_VALUE : closestStar.getClosestDist();
         if (closest != null) {
-            camera.near = (float) Math.min(CAM_NEAR, Math.min(closest.getDistToCamera() - closest.getRadius(), closestStarDist) / 3);
+            camera.near = (float) Math.min(1e3f * Constants.KM_TO_U, Math.min(closest.getDistToCamera() - closest.getRadius(), closestStarDist) / 3);
         }
         camera.position.set(0f, 0f, 0f);
         camera.direction.set(direction.valuesf());
