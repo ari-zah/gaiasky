@@ -66,7 +66,6 @@ public class ScreenshotsManager implements IObserver {
 
     public void renderFrame(IMainRenderer mr) {
         if (GlobalConf.frame.RENDER_OUTPUT) {
-
             switch (GlobalConf.frame.FRAME_MODE) {
             case simple:
                 frameRenderer.saveScreenshot(GlobalConf.frame.RENDER_FOLDER, GlobalConf.frame.RENDER_FILE_NAME, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true, GlobalConf.frame.FRAME_FORMAT, GlobalConf.frame.FRAME_QUALITY);
@@ -114,18 +113,13 @@ public class ScreenshotsManager implements IObserver {
     /**
      * Renders the current scene to an image and returns the file name where it
      * has been written to
-     * 
+     *
      * @param camera
-     * @param width
-     *            The width of the image.
-     * @param height
-     *            The height of the image.
-     * @param folder
-     *            The folder to save the image to.
-     * @param filename
-     *            The file name prefix.
-     * @param renderer
-     *            the {@link IFileImageRenderer} to use.
+     * @param width    The width of the image.
+     * @param height   The height of the image.
+     * @param folder   The folder to save the image to.
+     * @param filename The file name prefix.
+     * @param renderer the {@link IFileImageRenderer} to use.
      * @return String with the path to the screenshot image file.
      */
     public String renderToImage(IMainRenderer mr, ICamera camera, double dt, PostProcessBean ppb, int width, int height, String folder, String filename, IFileImageRenderer renderer, ImageFormat type, float quality) {
@@ -192,7 +186,8 @@ public class ScreenshotsManager implements IObserver {
             renderGui().update((Double) data[0]);
             break;
         case DISPOSE:
-            renderGui().dispose();
+            if (renderGui != null)
+                renderGui.dispose();
             break;
         }
 

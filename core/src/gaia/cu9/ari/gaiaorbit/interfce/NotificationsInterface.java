@@ -22,6 +22,8 @@ import gaia.cu9.ari.gaiaorbit.util.format.DateFormatFactory;
 import gaia.cu9.ari.gaiaorbit.util.format.IDateFormat;
 import gaia.cu9.ari.gaiaorbit.util.scene2d.OwnLabel;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -122,7 +124,7 @@ public class NotificationsInterface extends Table implements IObserver, IGuiInte
     }
 
     public void unsubscribe() {
-        EventManager.instance.unsubscribe(this, Events.POST_NOTIFICATION, Events.FOCUS_CHANGED, Events.TOGGLE_TIME_CMD, Events.TOGGLE_VISIBILITY_CMD, Events.CAMERA_MODE_CMD, Events.PACE_CHANGED_INFO, Events.FOCUS_LOCK_CMD, Events.TOGGLE_AMBIENT_LIGHT, Events.FOV_CHANGE_NOTIFICATION, Events.JAVA_EXCEPTION, Events.ORBIT_DATA_LOADED, Events.SCREENSHOT_INFO, Events.COMPUTE_GAIA_SCAN_CMD, Events.ONLY_OBSERVED_STARS_CMD, Events.TRANSIT_COLOUR_CMD, Events.LIMIT_MAG_CMD, Events.STEREOSCOPIC_CMD, Events.DISPLAY_GUI_CMD, Events.FRAME_OUTPUT_CMD, Events.STEREO_PROFILE_CMD, Events.OCTREE_PARTICLE_FADE_CMD);
+        EventManager.instance.removeAllSubscriptions(this);
     }
 
     private void addMessage(String msg) {
@@ -236,10 +238,21 @@ public class NotificationsInterface extends Table implements IObserver, IGuiInte
                     // addMessage("Field of view changed to " + (float) data[0]);
                     break;
                 case JAVA_EXCEPTION:
+                    Throwable t = (Throwable) data[0];
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    t.printStackTrace(pw);
+                    String stackTrace = sw.toString();
                     if (data.length == 1) {
-                        addMessage(I18n.bundle.format("notif.error", ((Throwable) data[0]).toString()));
+                        if(I18n.bundle != null)
+                            addMessage(I18n.bundle.format("notif.error", stackTrace));
+                        else
+                            addMessage("Error: " + stackTrace);
                     } else {
-                        addMessage(I18n.bundle.format("notif.error", data[1] + TAG_SEPARATOR + ((Throwable) data[0]).toString()));
+                        if(I18n.bundle != null)
+                            addMessage(I18n.bundle.format("notif.error", data[1] + TAG_SEPARATOR + stackTrace));
+                        else
+                            addMessage("Error: " + data[1] + TAG_SEPARATOR + stackTrace);
                     }
                     break;
                 case ORBIT_DATA_LOADED:

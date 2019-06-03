@@ -14,12 +14,14 @@ import gaia.cu9.ari.gaiaorbit.render.IModelRenderable;
 import gaia.cu9.ari.gaiaorbit.render.RenderingContext;
 import gaia.cu9.ari.gaiaorbit.render.system.LineRenderSystem;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
 import gaia.cu9.ari.gaiaorbit.util.time.ITimeFrameProvider;
 import gaia.cu9.ari.gaiaorbit.vr.VRContext.VRDevice;
 
 public class StubModel extends AbstractPositionEntity implements IModelRenderable, ILineRenderable {
 
-    public ModelInstance instance;
+    public IntModelInstance instance;
     private Environment env;
     private VRDevice device;
     private boolean delayRender = false;
@@ -63,7 +65,7 @@ public class StubModel extends AbstractPositionEntity implements IModelRenderabl
     }
 
     @Override
-    public void render(ModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
+    public void render(IntModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
         setTransparency(alpha);
         modelBatch.render(instance, env);
     }
@@ -71,7 +73,7 @@ public class StubModel extends AbstractPositionEntity implements IModelRenderabl
     /**
      * Occlusion rendering
      */
-    public void renderOpaque(ModelBatch modelBatch, float alpha, double t) {
+    public void renderOpaque(IntModelBatch modelBatch, float alpha, double t) {
         setTransparency(alpha);
         modelBatch.render(instance, env);
     }
@@ -148,7 +150,7 @@ public class StubModel extends AbstractPositionEntity implements IModelRenderabl
 
     @Override
     public float getLineWidth() {
-        return 5;
+        return 2.5f;
     }
 
 }

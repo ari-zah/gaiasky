@@ -7,10 +7,8 @@ package gaia.cu9.ari.gaiaorbit.scenegraph;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
@@ -27,6 +25,8 @@ import gaia.cu9.ari.gaiaorbit.scenegraph.component.ModelComponent;
 import gaia.cu9.ari.gaiaorbit.util.Constants;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.coord.Coordinates;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
 import gaia.cu9.ari.gaiaorbit.util.math.Intersectord;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
 import gaia.cu9.ari.gaiaorbit.util.math.Matrix4d;
@@ -206,7 +206,7 @@ public abstract class ModelBody extends CelestialBody {
      * Billboard quad rendering
      */
     @Override
-    public void render(ShaderProgram shader, float alpha, Mesh mesh, ICamera camera) {
+    public void render(ShaderProgram shader, float alpha, IntMesh mesh, ICamera camera) {
         compalpha = alpha;
 
         float size = getFuzzyRenderSize(camera);
@@ -232,7 +232,7 @@ public abstract class ModelBody extends CelestialBody {
 
     /** Model rendering **/
     @Override
-    public void render(ModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
+    public void render(IntModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
         prepareShadowEnvironment();
         mc.touch();
         mc.setTransparency(alpha * fadeOpacity);
@@ -241,7 +241,7 @@ public abstract class ModelBody extends CelestialBody {
     }
 
     /** Model opaque rendering. Disable shadow mapping **/
-    public void renderOpaque(ModelBatch modelBatch, float alpha, double t) {
+    public void renderOpaque(IntModelBatch modelBatch, float alpha, double t) {
         mc.touch();
         mc.setTransparency(alpha * fadeOpacity);
         mc.updateRelativisticEffects(GaiaSky.instance.getICamera());
@@ -254,7 +254,7 @@ public abstract class ModelBody extends CelestialBody {
 
     @Override
     protected float labelMax() {
-        return .5e-6f;
+        return 1e-9f;
     }
 
     public void setModel(ModelComponent mc) {
@@ -353,7 +353,7 @@ public abstract class ModelBody extends CelestialBody {
     protected void prepareShadowEnvironment() {
         if (GlobalConf.scene.SHADOW_MAPPING) {
             Environment env = mc.env;
-            SceneGraphRenderer sgr = GaiaSky.instance.sgr;
+            SceneGraphRenderer sgr = SceneGraphRenderer.instance;
             if (shadow > 0 && sgr.smTexMap.containsKey(this)) {
                 Matrix4 combined = sgr.smCombinedMap.get(this);
                 Texture tex = sgr.smTexMap.get(this);

@@ -7,11 +7,12 @@ package gaia.cu9.ari.gaiaorbit.interfce;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputEvent.Type;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import gaia.cu9.ari.gaiaorbit.GaiaSky;
 import gaia.cu9.ari.gaiaorbit.event.EventManager;
 import gaia.cu9.ari.gaiaorbit.event.Events;
@@ -21,21 +22,29 @@ import gaia.cu9.ari.gaiaorbit.scenegraph.SceneGraphNode;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.CameraManager.CameraMode;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.I18n;
-import gaia.cu9.ari.gaiaorbit.util.scene2d.OwnTextButton;
 import gaia.cu9.ari.gaiaorbit.util.scene2d.OwnTextField;
 
-public class SearchDialog extends Window {
-    private final Window me;
-    private final IGui gui;
-    private final TextField searchInput;
+public class SearchDialog extends GenericDialog {
+    private TextField searchInput;
     private String currentInputText = "";
+    private ISceneGraph sg;
 
-    public SearchDialog(IGui gui, Skin skin, final ISceneGraph sg) {
-        super(I18n.bundle.get("gui.objects.search"), skin);
-        this.me = this;
-        this.gui = gui;
+    public SearchDialog(Skin skin, Stage ui,  final ISceneGraph sg) {
+        super(I18n.bundle.get("gui.objects.search"), skin, ui);
+        this.sg = sg;
+
+        setAcceptText(I18n.txt("gui.close"));
+
+        // Build
+        buildSuper();
+
+        // Pack
+        pack();
+    }
+    public void build() {
+
         searchInput = new OwnTextField("", skin);
-        searchInput.setWidth(150 * GlobalConf.SCALE_FACTOR);
+        searchInput.setWidth(250 * GlobalConf.SCALE_FACTOR);
         searchInput.setMessageText(I18n.bundle.get("gui.objects.search"));
         searchInput.addListener(event -> {
             if (event instanceof InputEvent) {
@@ -65,28 +74,15 @@ public class SearchDialog extends Window {
             return false;
         });
 
-        HorizontalGroup buttonGroup = new HorizontalGroup();
-        TextButton cls = new OwnTextButton(I18n.bundle.get("gui.close"), skin, "default");
-        cls.setName("close");
-        cls.addListener(event -> {
-            if (event instanceof ChangeEvent) {
-                me.remove();
-                return true;
-            }
+        content.add(searchInput).top().left().expand().row();
+    }
 
-            return false;
-        });
-        buttonGroup.addActor(cls);
-        cls.setSize(70 * GlobalConf.SCALE_FACTOR, 20 * GlobalConf.SCALE_FACTOR);
-        buttonGroup.align(Align.right).space(10 * GlobalConf.SCALE_FACTOR);
+    @Override
+    public void accept(){
 
-        add(searchInput).top().left().expand().row();
-        add(buttonGroup).pad(5 * GlobalConf.SCALE_FACTOR, 0, 0, 0).bottom().right().expand();
-        getTitleTable().align(Align.left);
-        setModal(false);
-        pack();
-
-        this.setPosition(Math.round(gui.getGuiStage().getWidth() / 2f - this.getWidth() / 2f), Math.round(gui.getGuiStage().getHeight() / 2f - this.getHeight() / 2f));
+    }
+    @Override
+    public void cancel(){
 
     }
 
@@ -111,9 +107,12 @@ public class SearchDialog extends Window {
         searchInput.setText("");
     }
 
-    public void display() {
-        if (!gui.getGuiStage().getActors().contains(me, true))
-            gui.getGuiStage().addActor(this);
-        gui.getGuiStage().setKeyboardFocus(searchInput);
+    @Override
+    public GenericDialog show(Stage stage, Action action) {
+        GenericDialog gd = super.show(stage, action);
+        // Focus to input
+        stage.setKeyboardFocus(searchInput);
+        return gd;
     }
+
 }

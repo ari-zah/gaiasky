@@ -13,7 +13,7 @@ import com.badlogic.gdx.assets.loaders.AsynchronousAssetLoader;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import gaia.cu9.ari.gaiaorbit.util.override.AtmosphereShaderProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.AtmosphereShaderProvider;
 
 public class AtmosphereShaderProviderLoader<T extends AtmosphereShaderProviderLoader.AtmosphereShaderProviderParameter> extends AsynchronousAssetLoader<AtmosphereShaderProvider, T> {
 

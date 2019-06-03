@@ -70,11 +70,11 @@ public class SceneGraphNode implements IStarContainer, IPosition {
         MODEL_NORMAL(0),
         /** Using default shader, no normal map **/
         MODEL_DEFAULT(1),
-        /** Shader - stars **/
+        /** IntShader - stars **/
         BILLBOARD_STAR(2),
-        /** Shader - galaxies **/
+        /** IntShader - galaxies **/
         BILLBOARD_GAL(3),
-        /** Shader - front (planets, satellites...) **/
+        /** IntShader - front (planets, satellites...) **/
         BILLBOARD_SSO(4),
         /** Billboard with custom texture **/
         BILLBOARD_TEX(5),

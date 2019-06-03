@@ -19,9 +19,8 @@ import gaia.cu9.ari.gaiaorbit.util.I18n;
 
 /**
  * A collapsible pane with a detach-to-window button.
- * 
- * @author Toni Sagrista
  *
+ * @author Toni Sagrista
  */
 public class CollapsiblePane extends Table {
 
@@ -33,7 +32,7 @@ public class CollapsiblePane extends Table {
     Skin skin;
     Stage stage;
     float space;
-    Cell<?> contentCell = null;
+    Cell<?> contentCell;
 
     /** Collapse speed in pixels per second **/
     protected float collapseSpeed;
@@ -43,208 +42,215 @@ public class CollapsiblePane extends Table {
 
     /**
      * Creates a collapsible pane.
-     * 
-     * @param stage
-     *            The main stage.
-     * @param labelText
-     *            The text of the label.
-     * @param content
-     *            The content actor.
-     * @param skin
-     *            The skin to use.
-     * @param labelStyle
-     *            The style of the label.
-     * @param expandButtonStyle
-     *            The style of the expand icon.
-     * @param detachButtonStyle
-     *            The style of the detach icon.
-     * @param topIcons
-     *            List of top icons that will be added between the label and the
-     *            expand/detach icons.
+     *
+     * @param stage             The main stage.
+     * @param labelText         The text of the label.
+     * @param content           The content actor.
+     * @param skin              The skin to use.
+     * @param labelStyle        The style of the label.
+     * @param expandButtonStyle The style of the expand icon.
+     * @param detachButtonStyle The style of the detach icon.
+     * @param shortcut          The shortcut to expand/collapse. Shown in a tooltip.
+     * @param topIcons          List of top icons that will be added between the label and the
+     *                          expand/detach icons.
      */
-    public CollapsiblePane(final Stage stage, final String labelText, final Actor content, final Skin skin,
-	    String labelStyle, String expandButtonStyle, String detachButtonStyle, boolean expanded,
-	    Actor... topIcons) {
-	super();
-	this.stage = stage;
-	this.labelText = labelText;
-	this.content = content;
-	this.skin = skin;
-	this.space = 4 * GlobalConf.SCALE_FACTOR;
-	this.collapseSpeed = 1000;
+    public CollapsiblePane(final Stage stage, final String labelText, final Actor content, final Skin skin, String labelStyle, String expandButtonStyle, String detachButtonStyle, boolean expanded, String shortcut, Actor... topIcons) {
+        super();
+        this.stage = stage;
+        this.labelText = labelText;
+        this.content = content;
+        this.skin = skin;
+        this.space = 4 * GlobalConf.SCALE_FACTOR;
+        this.collapseSpeed = 1000;
 
-	Label mainLabel = new Label(labelText, skin, labelStyle);
+        Label mainLabel = new Label(labelText, skin, labelStyle);
 
-	// Expand icon
-	expandIcon = new OwnImageButton(skin, expandButtonStyle);
-	expandIcon.setName("expand-collapse");
-	expandIcon.addListener(event -> {
-	if (event instanceof ChangeEvent) {
-		toggleExpandCollapse();
-		return true;
-	}
-	return false;
-	});
-	expandIcon.addListener(new TextTooltip(I18n.bundle.get("gui.tooltip.expandcollapse.group"), skin));
+        // Expand icon
+        expandIcon = new OwnImageButton(skin, expandButtonStyle);
+        expandIcon.setName("expand-collapse");
+        expandIcon.setChecked(expanded);
+        expandIcon.addListener(event -> {
+            if (event instanceof ChangeEvent) {
+                toggleExpandCollapse();
+                return true;
+            }
+            return false;
+        });
+        expandIcon.addListener(new TextTooltip(I18n.bundle.get("gui.tooltip.expandcollapse.group") + (shortcut != null ? " (" + shortcut + ")" : ""), skin));
 
-	// Detach icon
-	detachIcon = new OwnImageButton(skin, detachButtonStyle);
-	detachIcon.setName("expand-collapse");
-	detachIcon.setChecked(false);
-	detachIcon.addListener(event -> {
-	if (event instanceof ChangeEvent) {
-		detach();
-		return true;
-	}
-	return false;
-	});
-	detachIcon.addListener(new TextTooltip(I18n.bundle.get("gui.tooltip.detach.group"), skin));
+        // Detach icon
+        detachIcon = new OwnImageButton(skin, detachButtonStyle);
+        detachIcon.setName("expand-collapse");
+        detachIcon.setChecked(false);
+        detachIcon.addListener(event -> {
+            if (event instanceof ChangeEvent) {
+                detach();
+                return true;
+            }
+            return false;
+        });
+        detachIcon.addListener(new TextTooltip(I18n.bundle.get("gui.tooltip.detach.group"), skin));
 
-	Table headerTable = new Table();
-	HorizontalGroup headerGroupLeft = new HorizontalGroup();
-	headerGroupLeft.space(space).align(Align.left);
-	headerGroupLeft.addActor(mainLabel);
+        // Question icon
+        Label questionLabel = new OwnLabel("(?)", skin, "question");
+        if (shortcut != null && !shortcut.isEmpty())
+            questionLabel.addListener(new TextTooltip(shortcut, skin));
 
-	if (topIcons != null && topIcons.length > 0) {
-	    for (Actor topIcon : topIcons) {
-		if (topIcon != null)
-		    headerGroupLeft.addActor(topIcon);
-	    }
-	}
+        Table headerTable = new Table();
 
-	HorizontalGroup headerGroupRight = new HorizontalGroup();
-	headerGroupRight.space(space).align(Align.right);
-	headerGroupRight.addActor(expandIcon);
-	headerGroupRight.addActor(detachIcon);
+        HorizontalGroup titleGroup = new HorizontalGroup();
+        titleGroup.space(3 * GlobalConf.SCALE_FACTOR);
+        titleGroup.addActor(mainLabel);
+        if (shortcut != null && !shortcut.isEmpty())
+            titleGroup.addActor(questionLabel);
 
-	headerTable.add(headerGroupLeft).left().space(4 * GlobalConf.SCALE_FACTOR);
-	headerTable.add().expandX();
-	headerTable.add(headerGroupRight).right();
+        HorizontalGroup headerGroupLeft = new HorizontalGroup();
+        headerGroupLeft.space(space).align(Align.left);
 
-	add(headerTable).spaceBottom(this.space).prefWidth(195 * GlobalConf.SCALE_FACTOR).row();
-	contentCell = add().prefHeight(0).prefWidth(195 * GlobalConf.SCALE_FACTOR);
+        if (topIcons != null && topIcons.length > 0) {
+            for (Actor topIcon : topIcons) {
+                if (topIcon != null)
+                    headerGroupLeft.addActor(topIcon);
+            }
+        }
 
-	if (expanded)
-	    contentCell.setActor(content);
+        HorizontalGroup headerGroupRight = new HorizontalGroup();
+        headerGroupRight.space(space).align(Align.right);
+        headerGroupRight.addActor(expandIcon);
+        headerGroupRight.addActor(detachIcon);
 
-	layout();
-	targetHeight = getHeight();
+        headerTable.add(titleGroup).left().padRight(4 * GlobalConf.SCALE_FACTOR);
+        headerTable.add(headerGroupLeft).left().pad(4 * GlobalConf.SCALE_FACTOR);
+        headerTable.add().expandX();
+        headerTable.add(headerGroupRight).right();
+
+        add(headerTable).padBottom(this.space).prefWidth(195 * GlobalConf.SCALE_FACTOR).row();
+        contentCell = add().prefHeight(0).prefWidth(195 * GlobalConf.SCALE_FACTOR);
+
+        if (expanded)
+            contentCell.setActor(content);
+
+        layout();
+        targetHeight = getHeight();
 
     }
 
-    public void expandPane() {
-	if (!expandIcon.isChecked()) {
-	    expandIcon.setChecked(true);
-	    expanding = true;
-	    collapsing = false;
-	}
+    public boolean expandPane() {
+        if (!expandIcon.isChecked()) {
+            expandIcon.setChecked(true);
+            expanding = true;
+            collapsing = false;
+            return true;
+        }
+        return false;
     }
 
-    public void collapsePane() {
-	if (expandIcon.isChecked()) {
-	    expandIcon.setChecked(false);
-	    expanding = false;
-	    collapsing = true;
-	}
+    public boolean collapsePane() {
+        if (expandIcon.isChecked()) {
+            expandIcon.setChecked(false);
+            expanding = false;
+            collapsing = true;
+            return true;
+        }
+        return false;
+    }
+
+    public void togglePane() {
+        if (!expandPane())
+            collapsePane();
     }
 
     private void toggleExpandCollapse() {
-	if (expandIcon.isChecked() && dialogWindow == null) {
-	    contentCell.setActor(content);
-	    expanding = true;
-	    collapsing = false;
-	} else {
-	    contentCell.clearActor();
-	    expanding = false;
-	    collapsing = true;
-	}
-	EventManager.instance.post(Events.RECALCULATE_OPTIONS_SIZE);
+        if (expandIcon.isChecked() && dialogWindow == null) {
+            contentCell.setActor(content);
+            expanding = true;
+            collapsing = false;
+        } else {
+            contentCell.clearActor();
+            expanding = false;
+            collapsing = true;
+        }
+        EventManager.instance.post(Events.RECALCULATE_OPTIONS_SIZE);
     }
 
     public void act(float dt) {
-	super.act(dt);
+        super.act(dt);
 
-	if (expanding) {
+        if (expanding) {
 
-	} else if (collapsing) {
+        } else if (collapsing) {
 
-	}
+        }
     }
 
     public void detach() {
-	dialogWindow = createWindow(labelText, content, skin, stage, lastx, lasty);
+        dialogWindow = createWindow(labelText, content, skin, stage, lastx, lasty);
 
-	// Display
-	if (!stage.getActors().contains(dialogWindow, true))
-	    stage.addActor(dialogWindow);
+        // Display
+        if (!stage.getActors().contains(dialogWindow, true))
+            stage.addActor(dialogWindow);
 
-	expandIcon.setChecked(false);
-	expandIcon.setDisabled(true);
-	detachIcon.setDisabled(true);
+        expandIcon.setChecked(false);
+        expandIcon.setDisabled(true);
+        detachIcon.setDisabled(true);
     }
 
     /**
      * Creates a collapsible pane.
-     * 
-     * @param stage
-     *            The main stage.
-     * @param labelText
-     *            The text of the label.
-     * @param content
-     *            The content actor.
-     * @param skin
-     *            The skin to use.
-     * @param topIcons
-     *            List of top icons that will be added between the label and the
-     *            expand/detach icons.
+     *
+     * @param stage     The main stage.
+     * @param labelText The text of the label.
+     * @param content   The content actor.
+     * @param skin      The skin to use.
+     * @param shortcut  The keyboard shortcut to use.
+     * @param topIcons  List of top icons that will be added between the label and the
+     *                  expand/detach icons.
      */
-    public CollapsiblePane(Stage stage, String labelText, final Actor content, Skin skin, boolean expanded,
-	    Actor... topIcons) {
-	this(stage, labelText, content, skin, "header", "expand-collapse", "detach", expanded, topIcons);
+    public CollapsiblePane(Stage stage, String labelText, final Actor content, Skin skin, boolean expanded, String shortcut, Actor... topIcons) {
+        this(stage, labelText, content, skin, "header", "expand-collapse", "detach", expanded, shortcut, topIcons);
     }
 
-    private CollapsibleWindow createWindow(String labelText, final Actor content, Skin skin, Stage stage, float x,
-	    float y) {
-	final CollapsibleWindow window = new CollapsibleWindow(labelText, skin);
-	window.align(Align.center);
+    private CollapsibleWindow createWindow(String labelText, final Actor content, Skin skin, Stage stage, float x, float y) {
+        final CollapsibleWindow window = new CollapsibleWindow(labelText, skin);
+        window.align(Align.center);
 
-	window.add(content).row();
+        window.add(content).row();
 
-	/** Close button **/
-	TextButton close = new OwnTextButton(I18n.bundle.get("gui.close"), skin, "default");
-	close.setName("close");
-	close.addListener(new EventListener() {
-	    @Override
-	    public boolean handle(Event event) {
-		if (event instanceof ChangeEvent) {
-		    lastx = window.getX();
-		    lasty = window.getY();
-		    window.remove();
-		    dialogWindow = null;
-		    expandIcon.setDisabled(false);
-		    detachIcon.setDisabled(false);
-		    return true;
-		}
+        /** Close button **/
+        TextButton close = new OwnTextButton(I18n.bundle.get("gui.close"), skin, "default");
+        close.setName("close");
+        close.addListener(new EventListener() {
+            @Override
+            public boolean handle(Event event) {
+                if (event instanceof ChangeEvent) {
+                    lastx = window.getX();
+                    lasty = window.getY();
+                    window.remove();
+                    dialogWindow = null;
+                    expandIcon.setDisabled(false);
+                    detachIcon.setDisabled(false);
+                    return true;
+                }
 
-		return false;
-	    }
+                return false;
+            }
 
-	});
-	Container<Button> closeContainer = new Container<Button>(close);
-	close.setSize(70, 20);
-	closeContainer.align(Align.right);
+        });
+        Container<Button> closeContainer = new Container<Button>(close);
+        close.setSize(70, 20);
+        closeContainer.align(Align.right);
 
-	window.add(closeContainer).pad(5, 0, 0, 0).bottom().right();
-	window.getTitleTable().align(Align.left);
-	window.align(Align.left);
-	window.pack();
+        window.add(closeContainer).pad(5, 0, 0, 0).bottom().right();
+        window.getTitleTable().align(Align.left);
+        window.align(Align.left);
+        window.pack();
 
-	x = x < 0 ? stage.getWidth() / 2f - window.getWidth() / 2f : x;
-	y = y < 0 ? stage.getHeight() / 2f - window.getHeight() / 2f : y;
-	window.setPosition(Math.round(x), Math.round(y));
-	window.pack();
+        x = x < 0 ? stage.getWidth() / 2f - window.getWidth() / 2f : x;
+        y = y < 0 ? stage.getHeight() / 2f - window.getHeight() / 2f : y;
+        window.setPosition(Math.round(x), Math.round(y));
+        window.pack();
 
-	return window;
+        return window;
     }
 
 }

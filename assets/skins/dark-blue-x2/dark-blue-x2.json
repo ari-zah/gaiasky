@@ -389,6 +389,9 @@
     "tooltip": {
       "imageUp": "tooltip-icon"
     },
+    "question": {
+      "imageUp": "question-mark"
+    },
     "audio-playpause": {
       "imageUp": "audio-play",
       "imageChecked": "audio-pause"
@@ -545,7 +548,11 @@
   "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
     "header": {
       "font": "ui-21",
-      "fontColor": "green"
+      "fontColor": "blue"
+    },
+    "question": {
+      "font": "ui-14",
+      "fontColor": "dark-gray"
     },
     "default": {
       "font": "ui-18",

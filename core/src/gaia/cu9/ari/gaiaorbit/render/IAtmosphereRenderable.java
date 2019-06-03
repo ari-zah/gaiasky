@@ -5,7 +5,7 @@
 
 package gaia.cu9.ari.gaiaorbit.render;
 
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
 
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
 
@@ -24,5 +24,5 @@ public interface IAtmosphereRenderable extends IRenderable {
      * @param t          The time in seconds since the start.
      * @param vroffset   Positional offset in vr mode, if any.
      */
-    void renderAtmosphere(ModelBatch modelBatch, float alpha, double t, Vector3d vroffset);
+    void renderAtmosphere(IntModelBatch modelBatch, float alpha, double t, Vector3d vroffset);
 }

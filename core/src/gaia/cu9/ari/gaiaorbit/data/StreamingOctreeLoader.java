@@ -381,19 +381,24 @@ public abstract class StreamingOctreeLoader implements IObserver, ISceneGraphLoa
             Array<AbstractPositionEntity> objects = octant.objects;
             if (objects != null) {
                 Gdx.app.postRunnable(() -> {
-                    for (AbstractPositionEntity object : objects) {
-                        int count = object.getStarCount();
-                        object.dispose();
-                        object.octant = null;
-                        octreeWrapper.removeParenthood(object);
-                        // Aux info
-                        if (GaiaSky.instance != null && GaiaSky.instance.sg != null)
-                            GaiaSky.instance.sg.removeNodeAuxiliaryInfo(object);
+                    try {
+                        for (AbstractPositionEntity object : objects) {
+                            int count = object.getStarCount();
+                            object.dispose();
+                            object.octant = null;
+                            octreeWrapper.removeParenthood(object);
+                            // Aux info
+                            if (GaiaSky.instance != null && GaiaSky.instance.sg != null)
+                                GaiaSky.instance.sg.removeNodeAuxiliaryInfo(object);
 
-                        nLoadedStars -= count;
+                            nLoadedStars -= count;
+                        }
+                        objects.clear();
+                        octant.setStatus(LoadStatus.NOT_LOADED);
+                    }catch(Exception e){
+                        logger.error("Error disposing octant's objects " + octant.pageId, e);
+                        logger.info(GlobalConf.APPLICATION_NAME + " will attempt to continue");
                     }
-                    objects.clear();
-                    octant.setStatus(LoadStatus.NOT_LOADED);
                 });
             }
 

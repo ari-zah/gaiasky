@@ -10,7 +10,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
@@ -29,6 +30,9 @@ import gaia.cu9.ari.gaiaorbit.util.Constants;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.ModelCache;
 import gaia.cu9.ari.gaiaorbit.util.Pair;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
 
@@ -64,8 +68,8 @@ public class Star extends Particle {
             params.put("diameter", 1d);
             params.put("flip", false);
 
-            Pair<Model, Map<String, Material>> pair = ModelCache.cache.getModel("sphere", params, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
-            Model model = pair.getFirst();
+            Pair<IntModel, Map<String, Material>> pair = ModelCache.cache.getModel("sphere", params, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
+            IntModel model = pair.getFirst();
             Material mat = pair.getSecond().get("base");
             mat.clear();
             mat.set(new TextureAttribute(TextureAttribute.Diffuse, tex));
@@ -79,7 +83,7 @@ public class Star extends Particle {
             mc.env = new Environment();
             mc.env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
             mc.env.set(new FloatAttribute(FloatAttribute.Shininess, 0f));
-            mc.instance = new ModelInstance(model, modelTransform);
+            mc.instance = new IntModelInstance(model, modelTransform);
             // Relativistic effects
             if (GlobalConf.runtime.RELATIVISTIC_ABERRATION)
                 mc.rec.setUpRelativisticEffectsMaterial(mc.instance.materials);
@@ -280,7 +284,7 @@ public class Star extends Particle {
     }
 
     @Override
-    public void render(ModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
+    public void render(IntModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
         mc.touch();
         float opac = 1;
         if (!GlobalConf.program.CUBEMAP360_MODE)

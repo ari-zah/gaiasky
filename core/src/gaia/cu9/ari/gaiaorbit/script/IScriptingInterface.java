@@ -18,6 +18,7 @@ import java.util.List;
  *
  * @author Toni Sagrista
  */
+@SuppressWarnings("unused")
 public interface IScriptingInterface {
 
     /**
@@ -32,7 +33,7 @@ public interface IScriptingInterface {
      * Pre-loads the given image as a texture for later use. The texture will
      * be cached for later use.
      *
-     * @param path
+     * @param path The path of the image file to preload
      */
     void preloadTexture(String path);
 
@@ -509,8 +510,6 @@ public interface IScriptingInterface {
      * @param key     The key of the component, see
      *                {@link gaia.cu9.ari.gaiaorbit.render.ComponentTypes.ComponentType}. Usually
      *                'element.stars', 'element.moons', 'element.atmospheres', etc.
-     *                Proper motion vectors are a special case not listed in component
-     *                types. Use the key 'element.propermotions' to that end.
      * @param visible The visible value.
      */
     void setVisibility(String key, boolean visible);
@@ -542,6 +541,12 @@ public interface IScriptingInterface {
      *             </ul>
      */
     void setProperMotionsColorMode(int mode);
+
+    /**
+     * Sets whether to show arrowheads or not for the velocity vectors.
+     * @param arrowheadsEnabled Whether to show the velocity vectors with arrowheads.
+     */
+    void setProperMotionsArrowheads(boolean arrowheadsEnabled);
 
     /**
      * Overrides the maximum number of proper motion vectors that the program
@@ -730,7 +735,7 @@ public interface IScriptingInterface {
     /**
      * Configures the frame output system, setting the resolution of the images,
      * the target frames per second, the output folder and the image name
-     * prefix.
+     * prefix. This function sets the frame output mode to 'redraw'.
      *
      * @param width      Width of images.
      * @param height     Height of images.
@@ -739,6 +744,16 @@ public interface IScriptingInterface {
      * @param namePrefix The file name prefix.
      */
     void configureFrameOutput(int width, int height, int fps, String folder, String namePrefix);
+
+    /**
+     * Sets the frame output mode. Possible values are 'redraw' or 'simple'.
+     * Simple mode is faster and just outputs the last frame rendered to the Gaia Sky window, with the same
+     * resolution and containing the UI elements.
+     * Redraw mode redraws the last frame using the resolution configured using {@link #configureFrameOutput(int, int, int, String, String)} and
+     * it does not draw the UI elements.
+     * @param screenshotMode The screenshot mode. 'simple' or 'redraw'.
+     */
+    void setFrameOutputMode(String screenshotMode);
 
     /**
      * Is the frame output system on?
@@ -1314,6 +1329,15 @@ public interface IScriptingInterface {
      *                   mode.
      */
     void setCubemapResolution(int resolution);
+
+    /**
+     * Sets the cubemap projection to use.
+     * Accepted values are "EQUIRECTANGULAR", "CYLINDRICAL" and "HAMMER".
+     * See {@link com.bitfire.postprocessing.effects.CubemapProjections.CubemapProjection} for possible
+     * values.
+     * @param projection
+     */
+    void setCubemapProjection(String projection);
 
     /**
      * Enables and disables the stereoscopic mode.

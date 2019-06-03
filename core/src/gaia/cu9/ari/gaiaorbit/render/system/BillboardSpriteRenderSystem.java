@@ -8,7 +8,6 @@ package gaia.cu9.ari.gaiaorbit.render.system;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -21,16 +20,17 @@ import gaia.cu9.ari.gaiaorbit.scenegraph.SceneGraphNode.RenderGroup;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
 import gaia.cu9.ari.gaiaorbit.util.DecalUtils;
 import gaia.cu9.ari.gaiaorbit.util.comp.DistToCameraComparator;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
 
 public class BillboardSpriteRenderSystem extends AbstractRenderSystem {
 
-    private Mesh mesh;
+    private IntMesh mesh;
     private Quaternion quaternion;
-    private int ctindex = -1;
+    private final int ctIndex;
 
-    public BillboardSpriteRenderSystem(RenderGroup rg, float[] alphas, ShaderProgram[] programs, int ctindex, float w, float h) {
+    public BillboardSpriteRenderSystem(RenderGroup rg, float[] alphas, ShaderProgram[] programs, int ctIndex, float w, float h) {
         super(rg, alphas, programs);
-        this.ctindex = ctindex;
+        this.ctIndex = ctIndex;
         init(w, h);
     }
 
@@ -43,11 +43,11 @@ public class BillboardSpriteRenderSystem extends AbstractRenderSystem {
      *            The alphas list
      * @param programs
      *            The shader programs to render the quad with
-     * @param ctindex
+     * @param ctIndex
      *            The component type index
      */
-    public BillboardSpriteRenderSystem(RenderGroup rg, float[] alphas, ShaderProgram[] programs, int ctindex) {
-        this(rg, alphas, programs, ctindex, 2, 2);
+    public BillboardSpriteRenderSystem(RenderGroup rg, float[] alphas, ShaderProgram[] programs, int ctIndex) {
+        this(rg, alphas, programs, ctIndex, 2, 2);
     }
 
     private void init(float w, float h) {
@@ -59,13 +59,13 @@ public class BillboardSpriteRenderSystem extends AbstractRenderSystem {
 
         // We wont need indices if we use GL_TRIANGLE_FAN to draw our quad
         // TRIANGLE_FAN will draw the verts in this order: 0, 1, 2; 0, 2, 3
-        mesh = new Mesh(true, 4, 6, new VertexAttribute(Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE), new VertexAttribute(Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE), new VertexAttribute(Usage.TextureCoordinates, 2, ShaderProgram.TEXCOORD_ATTRIBUTE + "0"));
+        mesh = new IntMesh(true, 4, 6, new VertexAttribute(Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE), new VertexAttribute(Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE), new VertexAttribute(Usage.TextureCoordinates, 2, ShaderProgram.TEXCOORD_ATTRIBUTE + "0"));
 
         mesh.setVertices(vertices, 0, vertices.length);
         mesh.getIndicesBuffer().position(0);
         mesh.getIndicesBuffer().limit(6);
 
-        short[] indices = new short[] { 0, 1, 2, 0, 2, 3 };
+        int[] indices = new int[] { 0, 1, 2, 0, 2, 3 };
         mesh.setIndices(indices);
 
         quaternion = new Quaternion();
@@ -115,7 +115,7 @@ public class BillboardSpriteRenderSystem extends AbstractRenderSystem {
 
     @Override
     public void renderStud(Array<IRenderable> renderables, ICamera camera, double t) {
-        if ((ctindex >= 0 ? alphas[ctindex] != 0 : true)) {
+        if ((ctIndex >= 0 ? alphas[ctIndex] != 0 : true)) {
             renderables.sort(comp);
 
             // Calculate billobard rotation quaternion ONCE

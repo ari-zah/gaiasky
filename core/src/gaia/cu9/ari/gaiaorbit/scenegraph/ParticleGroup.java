@@ -23,6 +23,7 @@ import gaia.cu9.ari.gaiaorbit.render.ComponentTypes.ComponentType;
 import gaia.cu9.ari.gaiaorbit.render.I3DTextRenderable;
 import gaia.cu9.ari.gaiaorbit.render.RenderingContext;
 import gaia.cu9.ari.gaiaorbit.render.system.FontRenderSystem;
+import gaia.cu9.ari.gaiaorbit.scenegraph.camera.CameraManager;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.CameraManager.CameraMode;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.NaturalCamera;
@@ -773,7 +774,8 @@ public class ParticleGroup extends FadeNode implements I3DTextRenderable, IFocus
         // Data to be gc'd
         this.pointData = null;
         // Remove focus if needed
-        if (GaiaSky.instance.getCameraManager().getFocus() != null && GaiaSky.instance.getCameraManager().getFocus() == this) {
+        CameraManager cam = GaiaSky.instance.getCameraManager();
+        if (cam != null && cam.getFocus() != null && cam.getFocus() == this) {
             this.setFocusIndex(-1);
             EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
         }

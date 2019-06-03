@@ -216,7 +216,7 @@ public class DesktopPostProcessor implements IPostProcessor, IObserver {
 
     private void initMotionBlur(int width, int height, PostProcessBean ppb) {
         ppb.motionblur = new MotionBlur(width, height);
-        ppb.motionblur.setBlurRadius(0.7f);
+        ppb.motionblur.setBlurRadius(0.0f);
         ppb.motionblur.setBlurOpacity(GlobalConf.postprocess.POSTPROCESS_MOTION_BLUR);
         ppb.motionblur.setEnabled(GlobalConf.postprocess.POSTPROCESS_MOTION_BLUR > 0);
         ppb.pp.addEffect(ppb.motionblur);
@@ -246,12 +246,7 @@ public class DesktopPostProcessor implements IPostProcessor, IObserver {
 
     @Override
     public void resize(final int width, final int height) {
-        Gdx.app.postRunnable(new Runnable() {
-            @Override
-            public void run() {
-                replace(RenderType.screen.index, width, height);
-            }
-        });
+        Gdx.app.postRunnable(() -> replace(RenderType.screen.index, width, height));
     }
 
     @Override
@@ -369,6 +364,7 @@ public class DesktopPostProcessor implements IPostProcessor, IObserver {
 
                         // Motion blur
                         ppb.motionblur.setEnabled(GlobalConf.postprocess.POSTPROCESS_MOTION_BLUR != 0);
+                        ppb.motionblur.setBlurOpacity(0.94f);
 
                     }
                 }

@@ -12,8 +12,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
@@ -28,6 +26,8 @@ import gaia.cu9.ari.gaiaorbit.event.IObserver;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
 import gaia.cu9.ari.gaiaorbit.util.*;
 import gaia.cu9.ari.gaiaorbit.util.Logger.Log;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +67,7 @@ public class ModelComponent implements Disposable, IObserver {
         ambient.color.set(level, level, level, 1f);
     }
 
-    public ModelInstance instance;
+    public IntModelInstance instance;
     public Environment env;
     /** Directional light **/
     public DirectionalLight dlight;
@@ -116,11 +116,11 @@ public class ModelComponent implements Disposable, IObserver {
         FileHandle model = modelFile != null ? GlobalConf.data.dataFileHandle(modelFile) : null;
         if (mesh) {
             if (!GlobalConf.scene.LAZY_MESH_INIT && modelFile != null && model.exists()) {
-                AssetBean.addAsset(GlobalConf.data.dataFile(modelFile), Model.class);
+                AssetBean.addAsset(GlobalConf.data.dataFile(modelFile), IntModel.class);
             }
         } else {
             if (modelFile != null && model.exists()) {
-                AssetBean.addAsset(GlobalConf.data.dataFile(modelFile), Model.class);
+                AssetBean.addAsset(GlobalConf.data.dataFile(modelFile), IntModel.class);
             }
         }
 
@@ -139,7 +139,7 @@ public class ModelComponent implements Disposable, IObserver {
         this.manager = manager;
         this.cc = cc;
 
-        Model model = null;
+        IntModel model = null;
         Map<String, Material> materials = null;
 
         if (staticLight) {
@@ -155,7 +155,7 @@ public class ModelComponent implements Disposable, IObserver {
         }
 
         if (!mesh || !GlobalConf.scene.LAZY_MESH_INIT) {
-            Pair<Model, Map<String, Material>> modmat = initModelFile();
+            Pair<IntModel, Map<String, Material>> modmat = initModelFile();
             model = modmat.getFirst();
             materials = modmat.getSecond();
         }
@@ -167,7 +167,7 @@ public class ModelComponent implements Disposable, IObserver {
 
         // CREATE MAIN MODEL INSTANCE
         if (!mesh || !GlobalConf.scene.LAZY_MESH_INIT) {
-            instance = new ModelInstance(model, localTransform);
+            instance = new IntModelInstance(model, localTransform);
         }
 
         // COLOR IF NO TEXTURE
@@ -185,13 +185,13 @@ public class ModelComponent implements Disposable, IObserver {
         modelLoading = false;
     }
 
-    private Pair<Model, Map<String, Material>> initModelFile() {
-        Model model = null;
+    private Pair<IntModel, Map<String, Material>> initModelFile() {
+        IntModel model = null;
         Map<String, Material> materials = null;
         if (modelFile != null && manager.isLoaded(GlobalConf.data.dataFile(modelFile))) {
             // Model comes from file (probably .obj or .g3db)
-            model = manager.get(GlobalConf.data.dataFile(modelFile), Model.class);
-            materials = new HashMap<String, Material>();
+            model = manager.get(GlobalConf.data.dataFile(modelFile), IntModel.class);
+            materials = new HashMap<>();
             if (model.materials.size == 0) {
                 Material material = new Material();
                 model.materials.add(material);
@@ -207,7 +207,7 @@ public class ModelComponent implements Disposable, IObserver {
 
         } else if (type != null) {
             // We create the model
-            Pair<Model, Map<String, Material>> pair = ModelCache.cache.getModel(type, params, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
+            Pair<IntModel, Map<String, Material>> pair = ModelCache.cache.getModel(type, params, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
             model = pair.getFirst();
             materials = pair.getSecond();
         } else {
@@ -218,7 +218,7 @@ public class ModelComponent implements Disposable, IObserver {
         if (materials.containsKey("base"))
             materials.get("base").clear();
 
-        return new Pair<Model, Map<String, Material>>(model, materials);
+        return new Pair<>(model, materials);
     }
 
     public void touch() {
@@ -261,13 +261,13 @@ public class ModelComponent implements Disposable, IObserver {
         if (localTransform != null && GlobalConf.scene.LAZY_MESH_INIT && !modelInitialised) {
             if (!modelLoading) {
                 logger.info(I18n.bundle.format("notif.loading", modelFile));
-                AssetBean.addAsset(GlobalConf.data.dataFile(modelFile), Model.class);
+                AssetBean.addAsset(GlobalConf.data.dataFile(modelFile), IntModel.class);
                 modelLoading = true;
             } else if (manager.isLoaded(GlobalConf.data.dataFile(modelFile))) {
-                Model model;
-                Pair<Model, Map<String, Material>> modMat = initModelFile();
+                IntModel model;
+                Pair<IntModel, Map<String, Material>> modMat = initModelFile();
                 model = modMat.getFirst();
-                instance = new ModelInstance(model, localTransform);
+                instance = new IntModelInstance(model, localTransform);
 
                 updateStaticLight();
 
@@ -326,7 +326,7 @@ public class ModelComponent implements Disposable, IObserver {
             int n = instance.materials.size;
             for (int i = 0; i < n; i++) {
                 Material mat = instance.materials.get(i);
-                BlendingAttribute ba = null;
+                BlendingAttribute ba;
                 if (mat.has(BlendingAttribute.Type)) {
                     ba = (BlendingAttribute) mat.get(BlendingAttribute.Type);
                     ba.destFunction = dst;

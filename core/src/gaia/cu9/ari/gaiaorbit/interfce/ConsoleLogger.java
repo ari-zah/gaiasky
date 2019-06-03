@@ -19,6 +19,8 @@ import gaia.cu9.ari.gaiaorbit.util.I18n;
 import gaia.cu9.ari.gaiaorbit.util.format.DateFormatFactory;
 import gaia.cu9.ari.gaiaorbit.util.format.IDateFormat;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.Instant;
 
 /**
@@ -163,17 +165,21 @@ public class ConsoleLogger implements IObserver {
             // addMessage("Field of view changed to " + (float) data[0]);
             break;
         case JAVA_EXCEPTION:
+            Throwable t = (Throwable) data[0];
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            t.printStackTrace(pw);
+            String stackTrace = sw.toString();
             if (data.length == 1) {
                 if(I18n.bundle != null)
-                    addMessage(I18n.bundle.format("notif.error", ((Throwable) data[0]).getMessage()));
+                    addMessage(I18n.bundle.format("notif.error", stackTrace));
                 else
-                    addMessage("Error: " + ((Throwable)data[0]).getMessage());
+                    addMessage("Error: " + stackTrace);
             } else {
                 if(I18n.bundle != null)
-                addMessage(I18n.bundle.format("notif.error", data[1] + TAG_SEPARATOR + ((Throwable) data[0]).getMessage()));
+                addMessage(I18n.bundle.format("notif.error", data[1] + TAG_SEPARATOR + stackTrace));
                 else
-                    addMessage("Error: " + data[1] + TAG_SEPARATOR + ((Throwable) data[0]).getMessage());
-
+                    addMessage("Error: " + data[1] + TAG_SEPARATOR + stackTrace);
             }
             break;
         case ORBIT_DATA_LOADED:

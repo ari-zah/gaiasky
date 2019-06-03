@@ -7,7 +7,6 @@ package gaia.cu9.ari.gaiaorbit.scenegraph;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.Vector3;
 import gaia.cu9.ari.gaiaorbit.GaiaSky;
 import gaia.cu9.ari.gaiaorbit.event.EventManager;
@@ -27,6 +26,7 @@ import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.Nature;
 import gaia.cu9.ari.gaiaorbit.util.color.ColourUtils;
 import gaia.cu9.ari.gaiaorbit.util.coord.AstroUtils;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector2d;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
 import gaia.cu9.ari.gaiaorbit.util.time.ITimeFrameProvider;
@@ -36,9 +36,8 @@ import java.util.Random;
 
 /**
  * A point particle which may represent a star, a galaxy, etc.
- * 
- * @author Toni Sagrista
  *
+ * @author Toni Sagrista
  */
 public class Particle extends CelestialBody implements IStarFocus, ILineRenderable {
 
@@ -63,17 +62,17 @@ public class Particle extends CelestialBody implements IStarFocus, ILineRenderab
         @Override
         public void notify(Events event, Object... data) {
             switch (event) {
-            case FOV_CHANGE_NOTIFICATION:
-                fovFactor = (Float) data[1];
-                thpointTimesFovfactor = (float) GlobalConf.scene.STAR_THRESHOLD_POINT * fovFactor;
-                thupOverFovfactor = (float) Constants.THRESHOLD_UP / fovFactor;
-                thdownOverFovfactor = (float) Constants.THRESHOLD_DOWN / fovFactor;
-                break;
-            case STAR_POINT_SIZE_CMD:
-                innerRad = 0.004f * DISC_FACTOR + (Float) data[0] * 0.008f;
-                break;
-            default:
-                break;
+                case FOV_CHANGE_NOTIFICATION:
+                    fovFactor = (Float) data[1];
+                    thpointTimesFovfactor = (float) GlobalConf.scene.STAR_THRESHOLD_POINT * fovFactor;
+                    thupOverFovfactor = (float) Constants.THRESHOLD_UP / fovFactor;
+                    thdownOverFovfactor = (float) Constants.THRESHOLD_DOWN / fovFactor;
+                    break;
+                case STAR_POINT_SIZE_CMD:
+                    innerRad = 0.004f * DISC_FACTOR + (Float) data[0] * 0.008f;
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -107,12 +106,18 @@ public class Particle extends CelestialBody implements IStarFocus, ILineRenderab
         return (float) GlobalConf.scene.STAR_THRESHOLD_QUAD;
     }
 
-    /** Must be updated every cycle **/
+    /**
+     * Must be updated every cycle
+     **/
     public static boolean renderOn = false;
 
-    /** Proper motion in cartesian coordinates [U/yr] **/
+    /**
+     * Proper motion in cartesian coordinates [U/yr]
+     **/
     public Vector3 pm;
-    /** MuAlpha [mas/yr], Mudelta [mas/yr], radvel [km/s] **/
+    /**
+     * MuAlpha [mas/yr], Mudelta [mas/yr], radvel [km/s]
+     **/
     public Vector3 pmSph;
 
     /**
@@ -137,20 +142,14 @@ public class Particle extends CelestialBody implements IStarFocus, ILineRenderab
 
     /**
      * Creates a new star.
-     * 
-     * @param pos
-     *            Cartesian position, in equatorial coordinates and in internal
-     *            units.
-     * @param appmag
-     *            Apparent magnitude.
-     * @param absmag
-     *            Absolute magnitude.
-     * @param colorbv
-     *            The B-V color index.
-     * @param name
-     *            The label or name.
-     * @param starid
-     *            The star unique id.
+     *
+     * @param pos     Cartesian position, in equatorial coordinates and in internal
+     *                units.
+     * @param appmag  Apparent magnitude.
+     * @param absmag  Absolute magnitude.
+     * @param colorbv The B-V color index.
+     * @param name    The label or name.
+     * @param starid  The star unique id.
      */
     public Particle(Vector3d pos, float appmag, float absmag, float colorbv, String name, long starid) {
         this();
@@ -283,15 +282,14 @@ public class Particle extends CelestialBody implements IStarFocus, ILineRenderab
      * Model rendering
      */
     @Override
-    public void render(ModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
+    public void render(IntModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
         // Void
     }
 
     /**
      * Sets the color
-     * 
-     * @param bv
-     *            B-V color index
+     *
+     * @param bv B-V color index
      */
     protected void setRGB(float bv) {
         if (cc == null)
@@ -380,7 +378,7 @@ public class Particle extends CelestialBody implements IStarFocus, ILineRenderab
 
     /**
      * Line renderer. Renders proper motion
-     * 
+     *
      * @param renderer
      * @param camera
      * @param alpha

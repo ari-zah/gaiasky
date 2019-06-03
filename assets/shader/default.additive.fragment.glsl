@@ -122,7 +122,7 @@ void main() {
 	#else
 		gl_FragColor.a = 1.0;
 	#endif
-    
+
 	gl_FragColor.rgb *= gl_FragColor.a;
 
 	// Prevent saturation

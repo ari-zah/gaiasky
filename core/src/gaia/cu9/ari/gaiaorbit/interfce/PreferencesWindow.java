@@ -100,7 +100,7 @@ public class PreferencesWindow extends GenericDialog {
         float tabwidth = (GlobalConf.SCALE_FACTOR > 1.5 ? 180 : 220) * GlobalConf.SCALE_FACTOR;
         float textwidth = 65 * GlobalConf.SCALE_FACTOR;
         float scrollh = 330 * GlobalConf.SCALE_FACTOR;
-        float controlsscrollw = 410 * GlobalConf.SCALE_FACTOR;
+        float controlsscrollw = 450 * GlobalConf.SCALE_FACTOR;
         float controllsscrollh = 250 * GlobalConf.SCALE_FACTOR;
         float sliderWidth = textwidth * 3;
 
@@ -571,7 +571,7 @@ public class PreferencesWindow extends GenericDialog {
 
         // LANGUAGE
         OwnLabel langLabel = new OwnLabel(I18n.txt("gui.ui.language"), skin);
-        File i18nfolder = new File(GlobalConf.ASSETS_LOC + "/i18n/");
+        File i18nfolder = new File(GlobalConf.ASSETS_LOC + File.separator + "i18n");
         String i18nname = "gsbundle";
         String[] files = i18nfolder.list();
         LangComboBoxBean[] langs = new LangComboBoxBean[files.length];
@@ -771,9 +771,9 @@ public class PreferencesWindow extends GenericDialog {
         // CONTROLLER MAPPINGS
         OwnLabel mappingsLabel = new OwnLabel(I18n.txt("gui.controller.mappingsfile"), skin);
         Array<FileComboBoxBean> controllerMappingsFiles = new Array<>();
-        FileHandle externalfolder = Gdx.files.absolute(GlobalConf.ASSETS_LOC + "./mappings/");
+        FileHandle externalfolder = new FileHandle(GlobalConf.ASSETS_LOC + File.separator + "mappings");
         FileHandle homefolder = Gdx.files.absolute(SysUtils.getDefaultMappingsDir().getPath());
-        Array<FileHandle> mappingFiles = new Array<FileHandle>();
+        Array<FileHandle> mappingFiles = new Array<>();
         GlobalResources.listRec(externalfolder, mappingFiles, ".controller");
         GlobalResources.listRec(homefolder, mappingFiles, ".controller");
         FileComboBoxBean selected = null;
@@ -829,10 +829,10 @@ public class PreferencesWindow extends GenericDialog {
             controls.add(new OwnLabel(pair[1], skin)).left().row();
         }
 
-        OwnScrollPane controlsScroll = new OwnScrollPane(controls, skin, "default-nobg");
+        OwnScrollPane controlsScroll = new OwnScrollPane(controls, skin, "minimalist-nobg");
         controlsScroll.setWidth(controlsscrollw);
         controlsScroll.setHeight(controllsscrollh);
-        controlsScroll.setForceScroll(false, true);
+        controlsScroll.setScrollingDisabled(true, false);
         controlsScroll.setSmoothScrolling(true);
         controlsScroll.setFadeScrollBars(false);
         scrolls.add(controlsScroll);
@@ -882,7 +882,6 @@ public class PreferencesWindow extends GenericDialog {
         screenshotsLocation.addListener(event -> {
             if (event instanceof ChangeEvent) {
                 FileChooser fc = new FileChooser(I18n.txt("gui.screenshots.directory.choose"), skin, stage, Gdx.files.absolute(GlobalConf.screenshot.SCREENSHOT_FOLDER), FileChooser.FileChooserTarget.DIRECTORIES);
-                fc.setFileBrowsingEnabled(false);
                 fc.setResultListener((success, result) -> {
                     if (success) {
                         // do stuff with result
@@ -988,7 +987,6 @@ public class PreferencesWindow extends GenericDialog {
         frameoutputLocation.addListener(event -> {
             if (event instanceof ChangeEvent) {
                 FileChooser fc = new FileChooser(I18n.txt("gui.frameoutput.directory.choose"), skin, stage, Gdx.files.absolute(GlobalConf.frame.RENDER_FOLDER), FileChooser.FileChooserTarget.DIRECTORIES);
-                fc.setFileBrowsingEnabled(false);
                 fc.setResultListener((success, result) -> {
                     if (success) {
                         // do stuff with result
@@ -1313,9 +1311,6 @@ public class PreferencesWindow extends GenericDialog {
             return false;
         });
 
-        report = new OwnCheckBox(I18n.txt("gui.system.allowreporting"), skin, pad5);
-        report.setChecked(GlobalConf.program.ANALYTICS_ENABLED);
-
         // RELOAD DEFAULTS
         OwnTextButton reloadDefaults = new OwnTextButton(I18n.txt("gui.system.reloaddefaults"), skin);
         reloadDefaults.addListener(event -> {
@@ -1556,7 +1551,7 @@ public class PreferencesWindow extends GenericDialog {
         LangComboBoxBean lbean = lang.getSelected();
         boolean reloadUI = !GlobalConf.program.UI_THEME.equals(theme.getSelected()) || !lbean.locale.toLanguageTag().equals(GlobalConf.program.LOCALE);
         GlobalConf.program.LOCALE = lbean.locale.toLanguageTag();
-        I18n.forceInit(Gdx.files.internal("i18n/gsbundle"));
+        I18n.forceInit(new FileHandle(GlobalConf.ASSETS_LOC + File.separator + "i18n/gsbundle"));
         GlobalConf.program.UI_THEME = theme.getSelected();
         boolean previousPointerCoords = GlobalConf.program.DISPLAY_POINTER_COORDS;
         GlobalConf.program.DISPLAY_POINTER_COORDS = pointerCoords.isChecked();
@@ -1634,7 +1629,7 @@ public class PreferencesWindow extends GenericDialog {
 
         // Camera recording
         GlobalConf.frame.CAMERA_REC_TARGET_FPS = Integer.parseInt(camrecFps.getText());
-        GlobalConf.frame.AUTO_FRAME_OUTPUT_CAMERA_PLAY = (Boolean) cbAutoCamrec.isChecked();
+        GlobalConf.frame.AUTO_FRAME_OUTPUT_CAMERA_PLAY = cbAutoCamrec.isChecked();
 
         // Cube map resolution
         int newres = Integer.parseInt(cmResolution.getText());
@@ -1642,10 +1637,12 @@ public class PreferencesWindow extends GenericDialog {
             EventManager.instance.post(Events.CUBEMAP_RESOLUTION_CMD, newres);
 
         // Controllers
-        String mappingsFile = controllerMappings.getSelected().file;
-        if (!mappingsFile.equals(GlobalConf.controls.CONTROLLER_MAPPINGS_FILE)) {
-            GlobalConf.controls.CONTROLLER_MAPPINGS_FILE = mappingsFile;
-            EventManager.instance.post(Events.RELOAD_CONTROLLER_MAPPINGS, mappingsFile);
+        if(controllerMappings.getSelected() != null) {
+            String mappingsFile = controllerMappings.getSelected().file;
+            if (!mappingsFile.equals(GlobalConf.controls.CONTROLLER_MAPPINGS_FILE)) {
+                GlobalConf.controls.CONTROLLER_MAPPINGS_FILE = mappingsFile;
+                EventManager.instance.post(Events.RELOAD_CONTROLLER_MAPPINGS, mappingsFile);
+            }
         }
         GlobalConf.controls.INVERT_LOOK_Y_AXIS = inverty.isChecked();
 
@@ -1653,7 +1650,6 @@ public class PreferencesWindow extends GenericDialog {
         GlobalConf.data.REAL_GAIA_ATTITUDE = real.isChecked();
 
         // System
-        GlobalConf.program.ANALYTICS_ENABLED = report.isChecked();
         if (GlobalConf.program.SHOW_DEBUG_INFO != debugInfoBak) {
             EventManager.instance.post(Events.SHOW_DEBUG_CMD, !debugInfoBak);
         }

@@ -1,49 +1,28 @@
 package gaia.cu9.ari.gaiaorbit.vr;
 
-import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
-
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.openvr.HmdMatrix34;
-import org.lwjgl.openvr.HmdMatrix44;
-import org.lwjgl.openvr.OpenVR;
-import org.lwjgl.openvr.RenderModel;
-import org.lwjgl.openvr.RenderModelTextureMap;
-import org.lwjgl.openvr.RenderModelVertex;
-import org.lwjgl.openvr.TrackedDevicePose;
-import org.lwjgl.openvr.VR;
-import org.lwjgl.openvr.VRCompositor;
-import org.lwjgl.openvr.VRControllerState;
-import org.lwjgl.openvr.VREvent;
-import org.lwjgl.openvr.VRRenderModels;
-import org.lwjgl.openvr.VRSystem;
-
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.model.MeshPart;
-import com.badlogic.gdx.graphics.g3d.model.Node;
-import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.ObjectMap;
-
+import com.badlogic.gdx.utils.*;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.Logger;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.*;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.openvr.*;
+
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
+
+import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -275,7 +254,7 @@ public class VRContext implements Disposable {
     private int width, height;
 
     // render models
-    private final ObjectMap<String, Model> models = new ObjectMap<String, Model>();
+    private final ObjectMap<String, IntModel> models = new ObjectMap<>();
 
     // book keeping
     private boolean renderingStarted = false;
@@ -610,7 +589,7 @@ public class VRContext implements Disposable {
         VR_ShutdownInternal();
     }
 
-    private Model loadRenderModel(String name) {
+    private IntModel loadRenderModel(String name) {
         if (models.containsKey(name))
             return models.get(name);
 
@@ -643,8 +622,8 @@ public class VRContext implements Disposable {
         RenderModelTextureMap renderModelTexture = new RenderModelTextureMap(texturePointer.getByteBuffer(RenderModelTextureMap.SIZEOF));
 
         // convert to a Model				
-        Mesh mesh = new Mesh(true, renderModel.unVertexCount(), renderModel.unTriangleCount() * 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0));
-        MeshPart meshPart = new MeshPart(name, mesh, 0, renderModel.unTriangleCount() * 3, GL20.GL_TRIANGLES);
+        IntMesh mesh = new IntMesh(true, renderModel.unVertexCount(), renderModel.unTriangleCount() * 3, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0));
+        IntMeshPart meshPart = new IntMeshPart(name, mesh, 0, renderModel.unTriangleCount() * 3, GL20.GL_TRIANGLES);
         RenderModelVertex.Buffer vertices = renderModel.rVertexData();
         float[] packedVertices = new float[8 * renderModel.unVertexCount()];
         int i = 0;
@@ -662,8 +641,17 @@ public class VRContext implements Disposable {
             packedVertices[i++] = v.rfTextureCoord().get(1);
         }
         mesh.setVertices(packedVertices);
-        short[] indices = new short[renderModel.unTriangleCount() * 3];
-        renderModel.IndexData().get(indices);
+
+        // Shorts to Integers
+        int[] indices = new int[renderModel.unTriangleCount() * 3];
+        ShortBuffer sb = renderModel.IndexData();
+        sb.rewind();
+        int j = 0;
+        while (sb.hasRemaining()) {
+            short index = sb.get();
+            indices[j++] = (int) index;
+        }
+
         mesh.setIndices(indices);
 
         Pixmap pixmap = new Pixmap(renderModelTexture.unWidth(), renderModelTexture.unHeight(), Format.RGBA8888);
@@ -674,13 +662,13 @@ public class VRContext implements Disposable {
         Texture texture = new Texture(new PixmapTextureData(pixmap, pixmap.getFormat(), true, true));
         Material material = new Material(new TextureAttribute(TextureAttribute.Diffuse, texture));
 
-        Model model = new Model();
+        IntModel model = new IntModel();
         model.meshes.add(mesh);
         model.meshParts.add(meshPart);
         model.materials.add(material);
-        Node node = new Node();
+        IntNode node = new IntNode();
         node.id = name;
-        node.parts.add(new NodePart(meshPart, material));
+        node.parts.add(new IntNodePart(meshPart, material));
         model.nodes.add(node);
         model.manageDisposable(mesh);
         model.manageDisposable(texture);
@@ -733,7 +721,7 @@ public class VRContext implements Disposable {
         private VRControllerRole role;
         private long buttons = 0;
         private final VRControllerState state = VRControllerState.create();
-        private final ModelInstance modelInstance;
+        private final IntModelInstance modelInstance;
 
         // tracker space
         private final Vector3 position = new Vector3();
@@ -757,8 +745,8 @@ public class VRContext implements Disposable {
             this.pose = pose;
             this.type = type;
             this.role = role;
-            Model model = loadRenderModel(getStringProperty(VRDeviceProperty.RenderModelName_String));
-            this.modelInstance = model != null ? new ModelInstance(model) : null;
+            IntModel model = loadRenderModel(getStringProperty(VRDeviceProperty.RenderModelName_String));
+            this.modelInstance = model != null ? new IntModelInstance(model) : null;
             if (model != null)
                 this.modelInstance.transform.set(pose.transform);
             if (type.equals(VRDeviceType.Controller))
@@ -967,11 +955,11 @@ public class VRContext implements Disposable {
         }
 
         /**
-         * @return a {@link ModelInstance} with the transform updated to the
+         * @return a {@link IntModelInstance} with the transform updated to the
          *         latest tracked position and orientation in world space for
          *         rendering or null
          */
-        public ModelInstance getModelInstance() {
+        public IntModelInstance getModelInstance() {
             return modelInstance;
         }
 

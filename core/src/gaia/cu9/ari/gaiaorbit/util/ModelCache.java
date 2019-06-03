@@ -8,9 +8,9 @@ package gaia.cu9.ari.gaiaorbit.util;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import gaia.cu9.ari.gaiaorbit.util.g3d.MeshPartBuilder2.VertexInfo;
-import gaia.cu9.ari.gaiaorbit.util.g3d.ModelBuilder2;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntMeshPartBuilder.VertexInfo;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBuilder;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,22 +18,22 @@ import java.util.Map;
 import java.util.Set;
 
 public class ModelCache {
-    final Map<String, Model> modelCache;
-    public ModelBuilder2 mb;
+    final Map<String, IntModel> modelCache;
+    public IntModelBuilder mb;
     /** Model cache **/
     public static ModelCache cache = new ModelCache();
 
     public ModelCache() {
-        modelCache = new HashMap<String, Model>();
-        mb = new ModelBuilder2();
+        modelCache = new HashMap<>();
+        mb = new IntModelBuilder();
     }
 
-    public Pair<Model, Map<String, Material>> getModel(String shape, Map<String, Object> params, int attributes) {
+    public Pair<IntModel, Map<String, Material>> getModel(String shape, Map<String, Object> params, int attributes) {
 
         String key = getKey(shape, params, attributes);
-        Model model = null;
-        Map<String, Material> materials = new HashMap<String, Material>();
-        Material mat = null;
+        IntModel model = null;
+        Map<String, Material> materials = new HashMap<>();
+        Material mat;
         if (modelCache.containsKey(key)) {
             model = modelCache.get(key);
             mat = model.materials.first();
@@ -196,7 +196,7 @@ public class ModelCache {
         }
         materials.put("base", mat);
 
-        return new Pair<Model, Map<String, Material>>(model, materials);
+        return new Pair<>(model, materials);
     }
 
     private String getKey(String shape, Map<String, Object> params, int attributes) {
@@ -211,8 +211,8 @@ public class ModelCache {
     }
 
     public void dispose() {
-        Collection<Model> models = modelCache.values();
-        for (Model model : models) {
+        Collection<IntModel> models = modelCache.values();
+        for (IntModel model : models) {
             try {
                 model.dispose();
             } catch (Exception e) {

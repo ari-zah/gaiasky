@@ -147,7 +147,6 @@ public class DownloadDataWindow extends GenericDialog {
             catalogsLoc.addListener((event) -> {
                 if (event instanceof ChangeEvent) {
                     FileChooser fc = new FileChooser(I18n.txt("gui.download.pickloc"), skin, stage, Gdx.files.absolute(GlobalConf.data.DATA_LOCATION), FileChooser.FileChooserTarget.DIRECTORIES);
-                    fc.setFileBrowsingEnabled(false);
                     fc.setResultListener((success, result) -> {
                         if (success) {
                             if (result.file().canRead() && result.file().canWrite()) {
@@ -185,13 +184,14 @@ public class DownloadDataWindow extends GenericDialog {
         Map<String, JsonValue> bestDs = new HashMap<>();
         Map<String, List<JsonValue>> typeMap = new HashMap<>();
         // We don't want repeated elements but want to keep insertion order
-        Set<String> types = new LinkedHashSet<String>();
+        Set<String> types = new LinkedHashSet<>();
 
         JsonValue dst = dataDesc.child().child();
         while (dst != null) {
-            boolean hasVersion = dst.has("mingsversion");
-            int thisVersion = dst.getInt("mingsversion", 0);
-            if (!hasVersion || thisVersion <= GaiaSkyDesktop.SOURCE_CONF_VERSION) {
+            boolean hasMinGsVersion = dst.has("mingsversion");
+            int minGsVersion = dst.getInt("mingsversion", 0);
+            int thisVersion = dst.getInt("version", 0);
+            if (!hasMinGsVersion || minGsVersion <= GaiaSkyDesktop.SOURCE_CONF_VERSION) {
                 // Dataset type
                 String type = dst.getString("type");
 
@@ -199,7 +199,7 @@ public class DownloadDataWindow extends GenericDialog {
                 String dsName = dst.getString("name");
                 if (bestDs.containsKey(dsName)) {
                     JsonValue other = bestDs.get(dsName);
-                    int otherVersion = other.getInt("mingsversion", 0);
+                    int otherVersion = other.getInt("version", 0);
                     if (otherVersion >= thisVersion) {
                         // Ignore this version
                         dst = dst.next();
@@ -238,161 +238,158 @@ public class DownloadDataWindow extends GenericDialog {
 
             for (JsonValue dataset : datasets) {
                 // Check if dataset requires a minimum version of Gaia Sky
-                boolean hasVersion = dataset.has("mingsversion");
-                if (!hasVersion || dataset.getInt("mingsversion", 0) <= GaiaSkyDesktop.SOURCE_CONF_VERSION) {
 
-                    // Check if we have it
-                    final Path check = Paths.get(GlobalConf.data.DATA_LOCATION, dataset.getString("check"));
-                    boolean exists = Files.exists(check) && Files.isReadable(check);
-                    int myVersion = checkJsonVersion(check);
-                    int serverVersion = dataset.getInt("version", 0);
-                    boolean outdated = serverVersion > myVersion;
+                // Check if we have it
+                final Path check = Paths.get(GlobalConf.data.DATA_LOCATION, dataset.getString("check"));
+                boolean exists = Files.exists(check) && Files.isReadable(check);
+                int myVersion = checkJsonVersion(check);
+                int serverVersion = dataset.getInt("version", 0);
+                boolean outdated = serverVersion > myVersion;
 
-                    String name = dataset.getString("name");
-                    // Add dataset to desc table
-                    OwnCheckBox cb = new OwnCheckBox(name, skin, "title", pad * 2f);
-                    boolean baseData = name.equals("default-data");
-                    cb.setChecked((!exists || outdated) && baseData);
-                    cb.setDisabled(baseData || (exists && !outdated));
-                    OwnLabel haveit = new OwnLabel("", skin);
-                    if (exists) {
-                        if (outdated) {
-                            setStatusOutdated(haveit);
-                        } else {
-                            setStatusFound(haveit);
-                        }
+                String name = dataset.getString("name");
+                // Add dataset to desc table
+                OwnCheckBox cb = new OwnCheckBox(name, skin, "title", pad * 2f);
+                boolean baseData = name.equals("default-data");
+                cb.setChecked((!exists || outdated) && baseData);
+                cb.setDisabled(baseData || (exists && !outdated));
+                OwnLabel haveit = new OwnLabel("", skin);
+                if (exists) {
+                    if (outdated) {
+                        setStatusOutdated(haveit);
                     } else {
-                        setStatusNotFound(haveit);
+                        setStatusFound(haveit);
                     }
+                } else {
+                    setStatusNotFound(haveit);
+                }
 
-                    // Can't proceed without base data - force download
-                    if (baseData && !exists) {
-                        me.acceptButton.setDisabled(true);
+                // Can't proceed without base data - force download
+                if (baseData && !exists) {
+                    me.acceptButton.setDisabled(true);
+                }
+
+                // Description
+                String description = dataset.getString("description");
+                String shortDescription;
+                HorizontalGroup descGroup = new HorizontalGroup();
+                descGroup.space(padl);
+                if (description.contains("-")) {
+                    shortDescription = description.substring(0, description.indexOf("-"));
+                } else {
+                    shortDescription = description;
+                }
+                OwnLabel desc = new OwnLabel(shortDescription, skin);
+                // Info
+                OwnImageButton imgTooltip = new OwnImageButton(skin, "tooltip");
+                imgTooltip.addListener(new OwnTextTooltip(description, skin, 10));
+                descGroup.addActor(imgTooltip);
+                descGroup.addActor(desc);
+                // Link
+                if (dataset.has("link")) {
+                    String link = dataset.getString("link");
+                    if (!link.isEmpty()) {
+                        LinkButton imgLink = new LinkButton(link, skin);
+                        descGroup.addActor(imgLink);
                     }
+                }
 
-                    // Description
-                    String description = dataset.getString("description");
-                    String shortDescription;
-                    HorizontalGroup descGroup = new HorizontalGroup();
-                    descGroup.space(padl);
-                    if (description.contains("-")) {
-                        shortDescription = description.substring(0, description.indexOf("-"));
-                    } else {
-                        shortDescription = description;
-                    }
-                    OwnLabel desc = new OwnLabel(shortDescription, skin);
-                    // Info
-                    OwnImageButton imgTooltip = new OwnImageButton(skin, "tooltip");
-                    imgTooltip.addListener(new OwnTextTooltip(description, skin, 10));
-                    descGroup.addActor(imgTooltip);
-                    descGroup.addActor(desc);
-                    // Link
-                    if (dataset.has("link")) {
-                        String link = dataset.getString("link");
-                        if (!link.isEmpty()) {
-                            LinkButton imgLink = new LinkButton(link, skin);
-                            descGroup.addActor(imgLink);
-                        }
-                    }
+                // Version
+                OwnLabel vers = new OwnLabel(exists && outdated ? myVersion + " -> v-" + serverVersion : "v-" + myVersion, skin);
+                if (!exists) {
+                    vers.addListener(new OwnTextTooltip(I18n.txt("gui.download.version.server", Integer.toString(serverVersion)), skin, 10));
+                } else if (outdated) {
+                    // New version!
+                    vers.setColor(1, 1, 0, 1);
+                    vers.addListener(new OwnTextTooltip(I18n.txt("gui.download.version.new", Integer.toString(serverVersion), Integer.toString(myVersion)), skin, 10));
+                } else {
+                    vers.addListener(new OwnTextTooltip(I18n.txt("gui.download.version.ok"), skin, 10));
+                }
 
-                    // Version
-                    OwnLabel vers = new OwnLabel(exists && outdated ? myVersion + " -> v-" + serverVersion : "v-" + myVersion, skin);
-                    if (!exists) {
-                        vers.addListener(new OwnTextTooltip(I18n.txt("gui.download.version.server", Integer.toString(serverVersion)), skin, 10));
-                    } else if (outdated) {
-                        // New version!
-                        vers.setColor(1, 1, 0, 1);
-                        vers.addListener(new OwnTextTooltip(I18n.txt("gui.download.version.new", Integer.toString(serverVersion), Integer.toString(myVersion)), skin, 10));
-                    } else {
-                        vers.addListener(new OwnTextTooltip(I18n.txt("gui.download.version.ok"), skin, 10));
-                    }
+                // Type icon
+                Image typeImage = new OwnImage(skin.getDrawable(getIcon(dataset.getString("type"))));
+                float scl = 0.7f;
+                float iw = typeImage.getWidth();
+                float ih = typeImage.getHeight();
+                typeImage.setSize(iw * scl, ih * scl);
+                typeImage.addListener(new OwnTextTooltip(dataset.getString("type"), skin, 10));
 
-                    // Type icon
-                    Image typeImage = new OwnImage(skin.getDrawable(getIcon(dataset.getString("type"))));
-                    float scl = 0.7f;
-                    float iw = typeImage.getWidth();
-                    float ih = typeImage.getHeight();
-                    typeImage.setSize(iw * scl, ih * scl);
-                    typeImage.addListener(new OwnTextTooltip(dataset.getString("type"), skin, 10));
+                // Size
+                String size;
+                try {
+                    long bytes = dataset.getLong("size");
+                    size = GlobalResources.humanReadableByteCount(bytes, true);
+                } catch (IllegalArgumentException e) {
+                    size = "?";
+                }
 
-                    // Size
-                    String size;
-                    try {
-                        long bytes = dataset.getLong("size");
-                        size = GlobalResources.humanReadableByteCount(bytes, true);
-                    } catch (IllegalArgumentException e) {
-                        size = "?";
-                    }
-
-                    // Delete
-                    final JsonValue ds = dataset;
-                    OwnImageButton rubbish = null;
-                    if (exists) {
-                        rubbish = new OwnImageButton(skin, "rubbish-bin");
-                        rubbish.addListener(new TextTooltip(I18n.txt("gui.tooltip.dataset.remove"), skin));
-                        rubbish.addListener((event) -> {
-                            if (event instanceof ChangeEvent) {
-                                // Remove dataset
-                                if (ds.has("data")) {
-                                    JsonValue data = ds.get("data");
-                                    String[] filesToDelete = data.asStringArray();
-                                    for (String fileToDelete : filesToDelete) {
-                                        try {
-                                            if (fileToDelete.endsWith("/")) {
-                                                fileToDelete = fileToDelete.substring(0, fileToDelete.length() - 1);
-                                            }
-                                            // Expand possible wildcards
-                                            String basePath = "";
-                                            String baseName = fileToDelete;
-                                            if (fileToDelete.contains("/")) {
-                                                basePath = fileToDelete.substring(0, fileToDelete.lastIndexOf('/'));
-                                                baseName = fileToDelete.substring(fileToDelete.lastIndexOf('/') + 1);
-                                            }
-                                            File dataLoc = new File(GlobalConf.data.DATA_LOCATION);
-                                            File directory = new File(dataLoc, basePath);
-                                            Collection<File> files = FileUtils.listFilesAndDirs(directory, new WildcardFileFilter(baseName), new WildcardFileFilter(baseName));
-                                            for (File file : files) {
-                                                if (!file.equals(directory) && file.exists()) {
-                                                    FileUtils.forceDelete(file);
-                                                }
-                                            }
-                                        } catch (Exception e) {
-                                            logger.error(e);
-                                        }
-                                    }
-                                } else {
-                                    // Only remove "check"
+                // Delete
+                final JsonValue ds = dataset;
+                OwnImageButton rubbish = null;
+                if (exists) {
+                    rubbish = new OwnImageButton(skin, "rubbish-bin");
+                    rubbish.addListener(new TextTooltip(I18n.txt("gui.tooltip.dataset.remove"), skin));
+                    rubbish.addListener((event) -> {
+                        if (event instanceof ChangeEvent) {
+                            // Remove dataset
+                            if (ds.has("data")) {
+                                JsonValue data = ds.get("data");
+                                String[] filesToDelete = data.asStringArray();
+                                for (String fileToDelete : filesToDelete) {
                                     try {
-                                        FileUtils.forceDelete(check.toFile());
-                                    } catch (IOException e) {
+                                        if (fileToDelete.endsWith("/")) {
+                                            fileToDelete = fileToDelete.substring(0, fileToDelete.length() - 1);
+                                        }
+                                        // Expand possible wildcards
+                                        String basePath = "";
+                                        String baseName = fileToDelete;
+                                        if (fileToDelete.contains("/")) {
+                                            basePath = fileToDelete.substring(0, fileToDelete.lastIndexOf('/'));
+                                            baseName = fileToDelete.substring(fileToDelete.lastIndexOf('/') + 1);
+                                        }
+                                        File dataLoc = new File(GlobalConf.data.DATA_LOCATION);
+                                        File directory = new File(dataLoc, basePath);
+                                        Collection<File> files = FileUtils.listFilesAndDirs(directory, new WildcardFileFilter(baseName), new WildcardFileFilter(baseName));
+                                        for (File file : files) {
+                                            if (!file.equals(directory) && file.exists()) {
+                                                FileUtils.forceDelete(file);
+                                            }
+                                        }
+                                    } catch (Exception e) {
                                         logger.error(e);
                                     }
                                 }
-                                // RELOAD DATASETS VIEW
-                                Gdx.app.postRunnable(() -> {
-                                    reloadAll();
-                                });
-
-                                return true;
+                            } else {
+                                // Only remove "check"
+                                try {
+                                    FileUtils.forceDelete(check.toFile());
+                                } catch (IOException e) {
+                                    logger.error(e);
+                                }
                             }
-                            return false;
-                        });
-                        rubbishes.add(rubbish);
-                    }
+                            // RELOAD DATASETS VIEW
+                            Gdx.app.postRunnable(() -> {
+                                reloadAll();
+                            });
 
-                    datasetsTable.add(cb).left().padRight(padl).padBottom(pad);
-                    datasetsTable.add(descGroup).left().padRight(padl).padBottom(pad);
-                    datasetsTable.add(vers).center().padRight(padl).padBottom(pad);
-                    datasetsTable.add(typeImage).center().padRight(padl).padBottom(pad);
-                    datasetsTable.add(size).left().padRight(padl).padBottom(pad);
-                    datasetsTable.add(haveit).center().padBottom(pad);
-                    if (exists) {
-                        datasetsTable.add(rubbish).center().padLeft(padl * 2.5f);
-                    }
-                    datasetsTable.row();
-
-                    choiceList.add(new Trio<>(dataset, cb, haveit));
+                            return true;
+                        }
+                        return false;
+                    });
+                    rubbishes.add(rubbish);
                 }
+
+                datasetsTable.add(cb).left().padRight(padl).padBottom(pad);
+                datasetsTable.add(descGroup).left().padRight(padl).padBottom(pad);
+                datasetsTable.add(vers).center().padRight(padl).padBottom(pad);
+                datasetsTable.add(typeImage).center().padRight(padl).padBottom(pad);
+                datasetsTable.add(size).left().padRight(padl).padBottom(pad);
+                datasetsTable.add(haveit).center().padBottom(pad);
+                if (exists) {
+                    datasetsTable.add(rubbish).center().padLeft(padl * 2.5f);
+                }
+                datasetsTable.row();
+
+                choiceList.add(new Trio<>(dataset, cb, haveit));
             }
 
         }

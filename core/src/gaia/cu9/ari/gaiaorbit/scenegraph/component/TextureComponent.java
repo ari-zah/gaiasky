@@ -11,13 +11,13 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import gaia.cu9.ari.gaiaorbit.data.AssetBean;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
 
 import java.util.Map;
 
@@ -136,7 +136,7 @@ public class TextureComponent {
         }
     }
 
-    public Material initMaterial(AssetManager manager, ModelInstance instance, float[] cc, boolean culling) {
+    public Material initMaterial(AssetManager manager, IntModelInstance instance, float[] cc, boolean culling) {
         Material material = instance.materials.get(0);
         if (base != null) {
             baseTex = manager.get(baseT, Texture.class);

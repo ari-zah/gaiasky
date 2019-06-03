@@ -6,15 +6,14 @@
 package gaia.cu9.ari.gaiaorbit.render.system;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.utils.Array;
 import gaia.cu9.ari.gaiaorbit.render.*;
 import gaia.cu9.ari.gaiaorbit.render.ComponentTypes.ComponentType;
 import gaia.cu9.ari.gaiaorbit.scenegraph.SceneGraphNode.RenderGroup;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
-import gaia.cu9.ari.gaiaorbit.render.ComponentTypes;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.comp.ModelComparator;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
 
 /**
  * Renders with a given model batch.
@@ -30,7 +29,7 @@ public class ModelBatchRenderSystem extends AbstractRenderSystem {
 
     private ComponentTypes ctAtm, ctClouds;
 
-    private ModelBatch batch;
+    private IntModelBatch batch;
     private boolean sort = true;
     private ModelRenderType type;
 
@@ -46,7 +45,7 @@ public class ModelBatchRenderSystem extends AbstractRenderSystem {
      * @param type
      *            The model render type
      */
-    public ModelBatchRenderSystem(RenderGroup rg, float[] alphas, ModelBatch batch, ModelRenderType type) {
+    public ModelBatchRenderSystem(RenderGroup rg, float[] alphas, IntModelBatch batch, ModelRenderType type) {
         super(rg, alphas, null);
         this.batch = batch;
         this.type = type;
@@ -56,7 +55,7 @@ public class ModelBatchRenderSystem extends AbstractRenderSystem {
         this.ctClouds = new ComponentTypes(ComponentType.Clouds);
     }
 
-    public ModelBatchRenderSystem(RenderGroup rg, float[] alphas, ModelBatch batch, ModelRenderType type, boolean sort) {
+    public ModelBatchRenderSystem(RenderGroup rg, float[] alphas, IntModelBatch batch, ModelRenderType type, boolean sort) {
         this(rg, alphas, batch, type);
         this.sort = sort;
     }

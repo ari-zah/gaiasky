@@ -16,9 +16,7 @@ import gaia.cu9.ari.gaiaorbit.util.GlobalResources;
 import gaia.cu9.ari.gaiaorbit.util.I18n;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Contains the key mappings and the actions. This should be persisted somehow
@@ -37,7 +35,12 @@ public class KeyBindings {
         }
     }
 
-    public static int SPECIAL1, SPECIAL2;
+    /** CONTROL **/
+    public static int SPECIAL1;
+    /** SHIFT **/
+    public static int SPECIAL2;
+    /** ALT **/
+    public static int SPECIAL3;
 
     /**
      * Creates a key mappings instance.
@@ -47,6 +50,7 @@ public class KeyBindings {
         // Init special keys
         SPECIAL1 = Keys.CONTROL_LEFT;
         SPECIAL2 = Keys.SHIFT_LEFT;
+        SPECIAL3 = Keys.ALT_LEFT;
         // For now this will do
         initDefault();
     }
@@ -65,6 +69,50 @@ public class KeyBindings {
             keys.add(key);
         }
         mappings.put(keys, action);
+    }
+
+    /**
+     * Finds an action given its name
+     * @param name The name
+     * @return The action if it exists
+     */
+    public ProgramAction findAction(String name){
+        Collection<ProgramAction> actions = mappings.values();
+        for(ProgramAction action : actions){
+            if(action.actionName.equals(name))
+                return action;
+        }
+        return null;
+    }
+
+    /**
+     * Gets the keys that trigger the action identified by the given name
+     * @param actionName The action name
+     * @return The keys
+     */
+    public TreeSet<Integer> getKeys(String actionName){
+        ProgramAction action = findAction(actionName);
+        if(action != null){
+            Set<Map.Entry<TreeSet<Integer>, ProgramAction>> entries = mappings.entrySet();
+            for(Map.Entry<TreeSet<Integer>, ProgramAction> entry : entries){
+                if(entry.getValue().equals(action)){
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
+
+    public String getStringKeys(String actionName){
+        TreeSet<Integer> keys = getKeys(actionName);
+        StringBuilder sb = new StringBuilder();
+        Iterator<Integer> it = keys.descendingIterator();
+        while(it.hasNext()){
+            sb.append(Keys.toString(it.next()));
+            if(it.hasNext())
+                sb.append("+");
+        }
+        return sb.toString();
     }
 
     /**
@@ -314,6 +362,34 @@ public class KeyBindings {
         addMapping(new ProgramAction(I18n.txt("action.toggle", I18n.txt("gui.minimap.title")), () ->
                 EventManager.instance.post(Events.TOGGLE_MINIMAP)), Keys.TAB);
 
+
+        // ALT_L + T -> Expand/collapse time pane
+        addMapping(new ProgramAction(I18n.txt("action.expandcollapse.pane", I18n.txt("gui.time")), () ->
+                EventManager.instance.post(Events.TOGGLE_EXPANDCOLLAPSE_PANE_CMD, "TimeComponent")), SPECIAL3, Keys.T);
+
+        // ALT_L + C -> Expand/collapse camera pane
+        addMapping(new ProgramAction(I18n.txt("action.expandcollapse.pane", I18n.txt("gui.camera")), () ->
+            EventManager.instance.post(Events.TOGGLE_EXPANDCOLLAPSE_PANE_CMD, "CameraComponent")), SPECIAL3, Keys.C);
+
+        // ALT_L + V -> Expand/collapse visibility pane
+        addMapping(new ProgramAction(I18n.txt("action.expandcollapse.pane", I18n.txt("gui.visibility")), () ->
+                EventManager.instance.post(Events.TOGGLE_EXPANDCOLLAPSE_PANE_CMD, "VisibilityComponent")), SPECIAL3, Keys.V);
+
+        // ALT_L + L -> Expand/collapse visual effects pane
+        addMapping(new ProgramAction(I18n.txt("action.expandcollapse.pane", I18n.txt("gui.lighting")), () ->
+                EventManager.instance.post(Events.TOGGLE_EXPANDCOLLAPSE_PANE_CMD, "VisualEffectsComponent")), SPECIAL3, Keys.L);
+
+        // ALT_L + D -> Expand/collapse datasets pane
+        addMapping(new ProgramAction(I18n.txt("action.expandcollapse.pane", I18n.txt("gui.dataset.title")), () ->
+                EventManager.instance.post(Events.TOGGLE_EXPANDCOLLAPSE_PANE_CMD, "DatasetsComponent")), SPECIAL3, Keys.D);
+
+        // ALT_L + O -> Expand/collapse objects pane
+        addMapping(new ProgramAction(I18n.txt("action.expandcollapse.pane", I18n.txt("gui.objects")), () ->
+                EventManager.instance.post(Events.TOGGLE_EXPANDCOLLAPSE_PANE_CMD, "ObjectsComponent")), SPECIAL3, Keys.O);
+
+        // ALT_L + M -> Expand/collapse music pane
+        addMapping(new ProgramAction(I18n.txt("action.expandcollapse.pane", I18n.txt("gui.music")), () ->
+                EventManager.instance.post(Events.TOGGLE_EXPANDCOLLAPSE_PANE_CMD, "MusicComponent")), SPECIAL3, Keys.M);
     }
 
     /**

@@ -46,7 +46,7 @@ public class MessagesInterface extends Table implements IObserver, IGuiInterface
     }
 
     private void unsubscribe() {
-        EventManager.instance.unsubscribe(this, Events.POST_HEADLINE_MESSAGE, Events.CLEAR_HEADLINE_MESSAGE, Events.POST_SUBHEAD_MESSAGE, Events.CLEAR_SUBHEAD_MESSAGE, Events.CLEAR_MESSAGES);
+        EventManager.instance.removeAllSubscriptions(this);
     }
 
     @Override

@@ -74,7 +74,7 @@ public abstract class GenericDialog extends CollapsibleWindow {
 
     protected void setAcceptText(String acceptText) {
         this.acceptText = acceptText;
-        if(acceptButton != null) {
+        if (acceptButton != null) {
             acceptButton.setText(acceptText);
             recalculateButtonSize();
         }
@@ -82,7 +82,7 @@ public abstract class GenericDialog extends CollapsibleWindow {
 
     protected void setCancelText(String cancelText) {
         this.cancelText = cancelText;
-        if(cancelButton != null) {
+        if (cancelButton != null) {
             cancelButton.setText(cancelText);
             recalculateButtonSize();
         }
@@ -153,34 +153,36 @@ public abstract class GenericDialog extends CollapsibleWindow {
 
         pack();
 
-        // Add keys for ESC, ENTER and TAB
+        // Add keys for ESC, ENTER, 'y', 'n', and TAB
         me.addListener(event -> {
             if (event instanceof InputEvent) {
                 InputEvent ievent = (InputEvent) event;
                 if (ievent.getType() == Type.keyUp) {
                     int key = ievent.getKeyCode();
                     switch (key) {
-                        case Keys.ESCAPE:
-                            // Exit
-                            cancel();
-                            if (cancelRunnable != null)
-                                cancelRunnable.run();
-                            me.hide();
-                            return true;
-                        case Keys.ENTER:
-                            // Exit
-                            accept();
-                            if (acceptRunnable != null)
-                                acceptRunnable.run();
-                            me.hide();
-                            return true;
-                        case Keys.TAB:
-                            // Next focus
+                    case Keys.N:
+                    case Keys.ESCAPE:
+                        // Exit
+                        cancel();
+                        if (cancelRunnable != null)
+                            cancelRunnable.run();
+                        me.hide();
+                        return true;
+                    case Keys.Y:
+                    case Keys.ENTER:
+                        // Exit
+                        accept();
+                        if (acceptRunnable != null)
+                            acceptRunnable.run();
+                        me.hide();
+                        return true;
+                    case Keys.TAB:
+                        // Next focus
 
-                            return true;
-                        default:
-                            // Nothing
-                            break;
+                        return true;
+                    default:
+                        // Nothing
+                        break;
                     }
                 }
             }
@@ -329,7 +331,7 @@ public abstract class GenericDialog extends CollapsibleWindow {
         this.acceptRunnable = r;
     }
 
-    public boolean hasAcceptRunnable(){
+    public boolean hasAcceptRunnable() {
         return acceptRunnable != null;
     }
 
@@ -342,7 +344,7 @@ public abstract class GenericDialog extends CollapsibleWindow {
         this.cancelRunnable = r;
     }
 
-    public boolean hasCancelRunnable(){
+    public boolean hasCancelRunnable() {
         return cancelRunnable != null;
     }
 

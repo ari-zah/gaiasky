@@ -14,7 +14,8 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
@@ -40,7 +41,10 @@ import gaia.cu9.ari.gaiaorbit.scenegraph.camera.CameraManager.CameraMode;
 import gaia.cu9.ari.gaiaorbit.util.*;
 import gaia.cu9.ari.gaiaorbit.util.format.INumberFormat;
 import gaia.cu9.ari.gaiaorbit.util.format.NumberFormatFactory;
-import gaia.cu9.ari.gaiaorbit.util.g3d.ModelBuilder2;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBuilder;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
 import gaia.cu9.ari.gaiaorbit.util.scene2d.OwnCheckBox;
@@ -80,11 +84,11 @@ public class SpacecraftGui extends AbstractGui {
     /**
      * Attitude indicator
      **/
-    private ModelBatch mb;
+    private IntModelBatch mb;
     private DecalBatch db;
     private SpriteBatch sb;
-    private Model aiModel;
-    private ModelInstance aiModelInstance;
+    private IntModel aiModel;
+    private IntModelInstance aiModelInstance;
     private Texture aiTexture, aiPointerTexture, aiVelTex, aiAntivelTex;
     private Decal aiVelDec, aiAntivelDec;
     private Environment env;
@@ -146,7 +150,7 @@ public class SpacecraftGui extends AbstractGui {
         env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f), new ColorAttribute(ColorAttribute.Specular, .5f, .5f, .5f, 1f));
         env.add(dlight);
         db = new DecalBatch(new CameraGroupStrategy(aiCam));
-        mb = new ModelBatch();
+        mb = new IntModelBatch();
 
         assetManager.load(GlobalConf.data.dataFile("tex/base/attitudeindicator.png"), Texture.class);
         assetManager.load("img/ai-pointer.png", Texture.class);
@@ -176,9 +180,9 @@ public class SpacecraftGui extends AbstractGui {
         aiAntivelDec = Decal.newDecal(new TextureRegion(aiAntivelTex));
 
         Material mat = new Material(new TextureAttribute(TextureAttribute.Diffuse, aiTexture), new ColorAttribute(ColorAttribute.Specular, 0.3f, 0.3f, 0.3f, 1f));
-        aiModel = new ModelBuilder2().createSphere(1 * GlobalConf.SCALE_FACTOR, 30, 30, false, mat, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
+        aiModel = new IntModelBuilder().createSphere(1 * GlobalConf.SCALE_FACTOR, 30, 30, false, mat, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
         aiTransform = new Matrix4();
-        aiModelInstance = new ModelInstance(aiModel, aiTransform);
+        aiModelInstance = new IntModelInstance(aiModel, aiTransform);
         aiViewport = new ExtendViewport(indicatorw, indicatorh, aiCam);
 
         buildGui();

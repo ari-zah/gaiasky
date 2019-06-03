@@ -14,7 +14,10 @@ import java.util.Map;
 public class Logger {
 
     public enum LoggerLevel {
-        ERROR(0), WARN(1), INFO(2), DEBUG(3);
+        ERROR(0),
+        WARN(1),
+        INFO(2),
+        DEBUG(3);
 
         public int val;
 
@@ -99,13 +102,15 @@ public class Logger {
      */
     private static Object[] removeFirstN(Object[] arr, int n) {
         Object[] res = new Object[arr.length - n];
-        if (arr.length - n >= 0) System.arraycopy(arr, 0 + n, res, 0, arr.length - n);
+        if (arr.length - n >= 0)
+            System.arraycopy(arr, 0 + n, res, 0, arr.length - n);
         return res;
     }
 
     private static Object[] getFirstNPlus(Object[] arr, int n, Object additional) {
         Object[] res = new Object[n + 1];
-        if (n >= 0) System.arraycopy(arr, 0, res, 0, n);
+        if (n >= 0)
+            System.arraycopy(arr, 0, res, 0, n);
         res[n] = additional;
         return res;
     }
@@ -182,7 +187,7 @@ public class Logger {
         }
 
         public void error(Throwable t, String message) {
-            Logger.error(prependTag(new Object[]{t, message}));
+            Logger.error(t, prependTag(new String[] { message }));
         }
 
         public void error(Object... messages) {

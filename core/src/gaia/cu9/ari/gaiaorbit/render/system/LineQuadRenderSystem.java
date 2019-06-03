@@ -7,18 +7,19 @@ package gaia.cu9.ari.gaiaorbit.render.system;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import gaia.cu9.ari.gaiaorbit.render.ComponentTypes;
 import gaia.cu9.ari.gaiaorbit.render.ILineRenderable;
 import gaia.cu9.ari.gaiaorbit.render.IRenderable;
+import gaia.cu9.ari.gaiaorbit.render.SceneGraphRenderer;
 import gaia.cu9.ari.gaiaorbit.scenegraph.Particle;
 import gaia.cu9.ari.gaiaorbit.scenegraph.SceneGraphNode.RenderGroup;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
-import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
 
@@ -41,7 +42,7 @@ public class LineQuadRenderSystem extends LineRenderSystem {
         int uvOffset;
         int indexIdx;
         int maxIndices;
-        short[] indices;
+        int[] indices;
 
         public void clear() {
             super.clear();
@@ -95,9 +96,9 @@ public class LineQuadRenderSystem extends LineRenderSystem {
             currext.maxIndices = curr.capacity + curr.capacity / 2;
 
             VertexAttribute[] attribs = buildVertexAttributes();
-            currext.mesh = new Mesh(false, curr.capacity, currext.maxIndices, attribs);
+            currext.mesh = new IntMesh(false, curr.capacity, currext.maxIndices, attribs);
 
-            currext.indices = new short[currext.maxIndices];
+            currext.indices = new int[currext.maxIndices];
             currext.vertexSize = currext.mesh.getVertexAttributes().vertexSize / 4;
             currext.vertices = new float[curr.capacity * currext.vertexSize];
 
@@ -229,13 +230,13 @@ public class LineQuadRenderSystem extends LineRenderSystem {
 
             // Indices
             if (i > 1) {
-                index((short) (currext.numVertices - 4));
-                index((short) (currext.numVertices - 2));
-                index((short) (currext.numVertices - 3));
+                index((currext.numVertices - 4));
+                index((currext.numVertices - 2));
+                index((currext.numVertices - 3));
 
-                index((short) (currext.numVertices - 2));
-                index((short) (currext.numVertices - 1));
-                index((short) (currext.numVertices - 3));
+                index((currext.numVertices - 2));
+                index((currext.numVertices - 1));
+                index((currext.numVertices - 3));
             }
         }
     }
@@ -288,17 +289,17 @@ public class LineQuadRenderSystem extends LineRenderSystem {
         vertex((float) point.x, (float) point.y, (float) point.z);
 
         // Add indexes
-        index((short) (currext.numVertices - 4));
-        index((short) (currext.numVertices - 2));
-        index((short) (currext.numVertices - 3));
+        index(currext.numVertices - 4);
+        index(currext.numVertices - 2);
+        index(currext.numVertices - 3);
 
-        index((short) (currext.numVertices - 2));
-        index((short) (currext.numVertices - 1));
-        index((short) (currext.numVertices - 3));
+        index(currext.numVertices - 2);
+        index(currext.numVertices - 1);
+        index(currext.numVertices - 3);
 
     }
 
-    private void index(short idx) {
+    private void index(int idx) {
         currext.indices[currext.indexIdx] = idx;
         currext.indexIdx++;
     }
@@ -317,7 +318,7 @@ public class LineQuadRenderSystem extends LineRenderSystem {
             ILineRenderable renderable = (ILineRenderable) renderables.get(i);
             boolean rend = true;
             // TODO ugly hack
-            if (renderable instanceof Particle && !GlobalConf.scene.PROPER_MOTION_VECTORS)
+            if (renderable instanceof Particle && !SceneGraphRenderer.instance.isOn(ComponentTypes.ComponentType.VelocityVectors))
                 rend = false;
             if (rend)
                 renderable.render(this, camera, getAlpha(renderable));

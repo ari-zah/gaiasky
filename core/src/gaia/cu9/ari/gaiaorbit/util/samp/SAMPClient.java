@@ -258,7 +258,7 @@ public class SAMPClient implements IObserver {
             }
             break;
         case DISPOSE:
-            if (conn != null && conn.isConnected()) {
+            if (conn != null) {
                 conn.setActive(false);
             }
             break;

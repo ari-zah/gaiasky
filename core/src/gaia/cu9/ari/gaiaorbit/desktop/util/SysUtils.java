@@ -33,7 +33,7 @@ public class SysUtils {
 
     private static String OS = System.getProperty("os.name").toLowerCase();
 
-    public static String getXdgDesktop(){
+    public static String getXdgDesktop() {
         return System.getenv("XDG_CURRENT_DESKTOP");
     }
 
@@ -67,7 +67,7 @@ public class SysUtils {
         return isLinux() && checkLinuxDesktop("budgie:GNOME");
     }
 
-    public static boolean checkI3(){
+    public static boolean checkI3() {
         return isLinux() && checkLinuxDesktop("i3");
     }
 
@@ -127,6 +127,7 @@ public class SysUtils {
     private static final String MAPPINGS_DIR_NAME = "mappings";
     private static final String DATA_DIR_NAME = "data";
     private static final String TMP_DIR_NAME = "tmp";
+    private static final String CRASHREPORTS_DIR_NAME = "crashreports";
 
     /**
      * Gets a file pointer to the camera directory.
@@ -161,7 +162,7 @@ public class SysUtils {
      * @return A pointer to the Gaia Sky music directory
      */
     public static File getDefaultMusicDir() {
-            return new File(getDataDir(), MUSIC_DIR_NAME);
+        return new File(getDataDir(), MUSIC_DIR_NAME);
     }
 
     /**
@@ -170,11 +171,7 @@ public class SysUtils {
      * @return A pointer to the Gaia Sky mappings directory
      */
     public static File getDefaultMappingsDir() {
-        if (isLinux()) {
-            return new File(getConfigDir(), MAPPINGS_DIR_NAME);
-        } else {
-            return new File(System.getProperty("user.home") + File.separator + GAIASKY_DIR_NAME + File.separator + MAPPINGS_DIR_NAME + File.separator);
-        }
+        return new File(getDataDir(), MAPPINGS_DIR_NAME);
     }
 
     /**
@@ -183,11 +180,16 @@ public class SysUtils {
      * @return A pointer to the local data directory where the data files are
      */
     public static File getLocalDataDir() {
-        if (isLinux()) {
-            return new File(getDataDir(), DATA_DIR_NAME);
-        } else {
-            return new File(System.getProperty("user.home") + File.separator + GAIASKY_DIR_NAME + File.separator + DATA_DIR_NAME + File.separator);
-        }
+        return new File(getDataDir(), DATA_DIR_NAME);
+    }
+
+    /**
+     * Gets a file pointer to the crash reports directory, where crash reports are stored.
+     *
+     * @return A pointer to the crash reports directory
+     */
+    public static File getCrashReportsDir() {
+        return new File(getDataDir(), CRASHREPORTS_DIR_NAME);
     }
 
     /**
@@ -202,6 +204,7 @@ public class SysUtils {
     /**
      * Returns the default data directory. That is ~/.gaiasky/ in Windows and macOS, and ~/.local/share/gaiasky
      * in Linux.
+     *
      * @return Default data directory
      */
     public static File getDataDir() {
@@ -228,18 +231,18 @@ public class SysUtils {
         }
     }
 
-    private static String getXdgDataHome(){
+    private static String getXdgDataHome() {
         String dhome = System.getenv("XDG_DATA_HOME");
-        if(dhome == null || dhome.isEmpty()){
+        if (dhome == null || dhome.isEmpty()) {
             return System.getProperty("user.home") + File.separator + ".local" + File.separator + "share";
         } else {
             return dhome;
         }
     }
 
-    private static String getXdgConfigHome(){
+    private static String getXdgConfigHome() {
         String chome = System.getenv("XDG_CONFIG_HOME");
-        if(chome == null || chome.isEmpty()){
+        if (chome == null || chome.isEmpty()) {
             return System.getProperty("user.home") + File.separator + ".config";
         } else {
             return chome;

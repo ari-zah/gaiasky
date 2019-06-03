@@ -14,15 +14,12 @@ import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.ui.TooltipManager;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.Timer.Task;
 import gaia.cu9.ari.gaiaorbit.assets.*;
 import gaia.cu9.ari.gaiaorbit.assets.GaiaAttitudeLoader.GaiaAttitudeLoaderParameter;
@@ -30,6 +27,7 @@ import gaia.cu9.ari.gaiaorbit.assets.SGLoader.SGLoaderParameter;
 import gaia.cu9.ari.gaiaorbit.data.AssetBean;
 import gaia.cu9.ari.gaiaorbit.data.StreamingOctreeLoader;
 import gaia.cu9.ari.gaiaorbit.data.util.PointCloudData;
+import gaia.cu9.ari.gaiaorbit.desktop.util.CrashReporter;
 import gaia.cu9.ari.gaiaorbit.event.EventManager;
 import gaia.cu9.ari.gaiaorbit.event.Events;
 import gaia.cu9.ari.gaiaorbit.event.IObserver;
@@ -45,15 +43,21 @@ import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
 import gaia.cu9.ari.gaiaorbit.scenegraph.component.ModelComponent;
 import gaia.cu9.ari.gaiaorbit.script.HiddenHelperUser;
 import gaia.cu9.ari.gaiaorbit.script.ScriptingServer;
+import gaia.cu9.ari.gaiaorbit.util.Logger;
 import gaia.cu9.ari.gaiaorbit.util.*;
 import gaia.cu9.ari.gaiaorbit.util.Logger.Log;
-import gaia.cu9.ari.gaiaorbit.util.g3d.loader.ObjLoader;
 import gaia.cu9.ari.gaiaorbit.util.gaia.GaiaAttitudeServer;
+import gaia.cu9.ari.gaiaorbit.util.gdx.loader.G3dModelLoader;
+import gaia.cu9.ari.gaiaorbit.util.gdx.loader.ObjLoader;
+import gaia.cu9.ari.gaiaorbit.util.gdx.loader.is.GzipInputStreamProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.loader.is.RegularInputStreamProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.AtmosphereShaderProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.GroundShaderProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.RelativisticShaderProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.ShaderProgramProvider;
 import gaia.cu9.ari.gaiaorbit.util.gravwaves.RelativisticEffectsManager;
-import gaia.cu9.ari.gaiaorbit.util.override.AtmosphereShaderProvider;
-import gaia.cu9.ari.gaiaorbit.util.override.GroundShaderProvider;
-import gaia.cu9.ari.gaiaorbit.util.override.RelativisticShaderProvider;
-import gaia.cu9.ari.gaiaorbit.util.override.ShaderProgramProvider;
 import gaia.cu9.ari.gaiaorbit.util.samp.SAMPClient;
 import gaia.cu9.ari.gaiaorbit.util.time.GlobalClock;
 import gaia.cu9.ari.gaiaorbit.util.time.ITimeFrameProvider;
@@ -126,8 +130,7 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
     private String dataLoadString;
 
     public ISceneGraph sg;
-    // TODO make this private again
-    public SceneGraphRenderer sgr;
+    private SceneGraphRenderer sgr;
     private IPostProcessor pp;
 
     // Start time
@@ -226,6 +229,7 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
         logger.info(GlobalConf.version.version, I18n.bundle.format("gui.build", GlobalConf.version.build));
         logger.info("Display mode", Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), "Fullscreen: " + Gdx.graphics.isFullscreen());
         logger.info("Device", Gdx.gl.glGetString(GL20.GL_RENDERER));
+        logger.info(I18n.bundle.format("notif.glversion", Gdx.gl.glGetString(GL20.GL_VERSION)));
         logger.info(I18n.bundle.format("notif.glslversion", Gdx.gl.glGetString(GL20.GL_SHADING_LANGUAGE_VERSION)));
         logger.info("Java version", System.getProperty("java.version"), System.getProperty("java.vendor"));
 
@@ -262,11 +266,15 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
         manager.setLoader(PointCloudData.class, new OrbitDataLoader(dataResolver));
         manager.setLoader(GaiaAttitudeServer.class, new GaiaAttitudeLoader(dataResolver));
         manager.setLoader(ShaderProgram.class, new ShaderProgramProvider(internalResolver, ".vertex.glsl", ".fragment.glsl"));
-        //manager.setLoader(DefaultShaderProvider.class, new DefaultShaderProviderLoader<>(resolver));
+        //manager.setLoader(DefaultIntShaderProvider.class, new DefaultShaderProviderLoader<>(resolver));
         manager.setLoader(AtmosphereShaderProvider.class, new AtmosphereShaderProviderLoader<>(internalResolver));
         manager.setLoader(GroundShaderProvider.class, new GroundShaderProviderLoader<>(internalResolver));
         manager.setLoader(RelativisticShaderProvider.class, new RelativisticShaderProviderLoader<>(internalResolver));
-        manager.setLoader(Model.class, ".obj", new ObjLoader(internalResolver));
+        manager.setLoader(IntModel.class, ".obj", new ObjLoader(new RegularInputStreamProvider(), internalResolver));
+        manager.setLoader(IntModel.class, ".obj.gz", new ObjLoader(new GzipInputStreamProvider(), internalResolver));
+        manager.setLoader(IntModel.class, ".g3dj", new G3dModelLoader(new JsonReader(), internalResolver));
+        manager.setLoader(IntModel.class, ".g3db", new G3dModelLoader(new UBJsonReader(), internalResolver));
+        // Remove Model loaders
 
         // Init global resources
         GlobalResources.initialize(manager);
@@ -308,8 +316,8 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
         createVR();
 
         // Scene graph renderer
-        sgr = new SceneGraphRenderer(vrContext);
-        sgr.initialize(manager);
+        SceneGraphRenderer.initialise(manager, vrContext);
+        sgr = SceneGraphRenderer.instance;
 
         // Initialise scripting gateway server
         ScriptingServer.initialize();
@@ -329,7 +337,7 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
     }
 
     /**
-     * All {@link ModelInstance}s to be rendered
+     * All {@link IntModelInstance}s to be rendered
      **/
     //Array<ModelInstance> modelInstances = new Array<ModelInstance>();
     private void createVR() {
@@ -719,9 +727,7 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
         try {
             renderProcess.run();
         } catch (Throwable t) {
-            logger.error(t);
-            // TODO implement error reporting?
-
+            CrashReporter.reportCrash(t, logger);
             // Quit
             Gdx.app.exit();
         }

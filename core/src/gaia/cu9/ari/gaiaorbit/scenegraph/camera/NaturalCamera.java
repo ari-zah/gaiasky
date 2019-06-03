@@ -52,7 +52,7 @@ import gaia.cu9.ari.gaiaorbit.util.tree.OctreeNode;
  */
 public class NaturalCamera extends AbstractCamera implements IObserver {
 
-    private static final double MIN_DIST = 10 * Constants.M_TO_U;
+    private static final double MIN_DIST = 5 * Constants.M_TO_U;
 
     /** VR offset **/
     public Vector3d vroffset;
@@ -468,7 +468,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     protected void updatePerspectiveCamera() {
         double closestStarDist = closestStar == null ? Double.MAX_VALUE : closestStar.getClosestDist();
         if (closest != null) {
-            camera.near = (float) Math.min(1e3f * Constants.KM_TO_U, Math.min(closest.getDistToCamera() - closest.getRadius(), closestStarDist) / 3);
+            camera.near = (float) Math.min(CAM_NEAR, Math.min(closest.getDistToCamera() - closest.getRadius(), closestStarDist) / 3);
         }
         camera.position.set(0f, 0f, 0f);
         camera.direction.set(direction.valuesf());
@@ -1134,7 +1134,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
         case TOGGLE_VISIBILITY_CMD:
             if(getMode().isFocus()){
                 ComponentType ct = ComponentType.getFromKey((String) data[0]);
-                if(this.focus != null && this.focus.getCt().isEnabled(ct)){
+                if(this.focus != null && ct != null && this.focus.getCt().isEnabled(ct)){
                     // Set camera  free
                     EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
                 }
@@ -1357,6 +1357,34 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
                     spriteBatch.draw(focusArrow, auxf1.x, auxf1.y, chw2, chh2, chw, chh, 1f, 1f, ang, 0, 0, (int) chw, (int) chw, false, false);
                 }
             }
+
+            // Velocity crosshair only if we move
+            // double speed = vel.len();
+            // if (speed > 0) {
+            // float chw = velocityCrosshair.getWidth();
+            // float chh = velocityCrosshair.getHeight();
+            // float chw2 = chw / 2;
+            // float chh2 = chh / 2;
+            //
+            // if (vel.anglePrecise(direction) < 60) {
+            //
+            // // ANTIVEL
+            // drawVelCrosshair(antivelocityCrosshair, rw, rh, chw, chh, chw2,
+            // chh2, -1);
+            //
+            // // VEL
+            // drawVelCrosshair(velocityCrosshair, rw, rh, chw, chh, chw2, chh2,
+            // 1);
+            // } else {
+            // // VEL
+            // drawVelCrosshair(velocityCrosshair, rw, rh, chw, chh, chw2, chh2,
+            // 1);
+            //
+            // // ANTIVEL
+            // drawVelCrosshair(antivelocityCrosshair, rw, rh, chw, chh, chw2,
+            // chh2, -1);
+            // }
+            // }
 
             // Gravitational waves crosshair
             if (GlobalConf.runtime.GRAVITATIONAL_WAVES) {

@@ -8,8 +8,6 @@ package gaia.cu9.ari.gaiaorbit.scenegraph.component;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
@@ -19,9 +17,11 @@ import gaia.cu9.ari.gaiaorbit.util.Constants;
 import gaia.cu9.ari.gaiaorbit.util.ModelCache;
 import gaia.cu9.ari.gaiaorbit.util.Pair;
 import gaia.cu9.ari.gaiaorbit.util.coord.Coordinates;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.AtmosphereAttribute;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.Vector3Attribute;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
-import gaia.cu9.ari.gaiaorbit.util.override.AtmosphereAttribute;
-import gaia.cu9.ari.gaiaorbit.util.override.Vector3Attribute;
 import gaia.cu9.ari.gaiaorbit.vr.VRContext;
 
 import java.util.Map;
@@ -59,15 +59,15 @@ public class AtmosphereComponent {
         this.planetSize = planetSize;
         setUpAtmosphericScatteringMaterial(planetMat, correctGround ? true : false);
 
-        Pair<Model, Map<String, Material>> pair = ModelCache.cache.getModel("sphere", params, Usage.Position | Usage.Normal);
-        Model atmosphereModel = pair.getFirst();
+        Pair<IntModel, Map<String, Material>> pair = ModelCache.cache.getModel("sphere", params, Usage.Position | Usage.Normal);
+        IntModel atmosphereModel = pair.getFirst();
         Material atmMat = pair.getSecond().get("base");
         atmMat.clear();
         setUpAtmosphericScatteringMaterial(atmMat, false);
         atmMat.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
 
         // CREATE ATMOSPHERE MODEL
-        mc.instance = new ModelInstance(atmosphereModel, this.localTransform);
+        mc.instance = new IntModelInstance(atmosphereModel, this.localTransform);
 
     }
 

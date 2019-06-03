@@ -5,6 +5,7 @@
 
 package gaia.cu9.ari.gaiaorbit.desktop;
 
+import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.LifecycleListener;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
@@ -12,20 +13,14 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.brsanthu.googleanalytics.GoogleAnalyticsResponse;
 import gaia.cu9.ari.gaiaorbit.GaiaSky;
-import gaia.cu9.ari.gaiaorbit.analytics.AnalyticsPermission;
-import gaia.cu9.ari.gaiaorbit.analytics.AnalyticsReporting;
 import gaia.cu9.ari.gaiaorbit.data.DesktopSceneGraphImplementationProvider;
 import gaia.cu9.ari.gaiaorbit.data.SceneGraphImplementationProvider;
 import gaia.cu9.ari.gaiaorbit.desktop.format.DesktopDateFormatFactory;
 import gaia.cu9.ari.gaiaorbit.desktop.format.DesktopNumberFormatFactory;
 import gaia.cu9.ari.gaiaorbit.desktop.render.DesktopPostProcessorFactory;
 import gaia.cu9.ari.gaiaorbit.desktop.render.ScreenModeCmd;
-import gaia.cu9.ari.gaiaorbit.desktop.util.DesktopConfInit;
-import gaia.cu9.ari.gaiaorbit.desktop.util.DesktopMusicActors;
-import gaia.cu9.ari.gaiaorbit.desktop.util.DesktopNetworkChecker;
-import gaia.cu9.ari.gaiaorbit.desktop.util.SysUtils;
+import gaia.cu9.ari.gaiaorbit.desktop.util.*;
 import gaia.cu9.ari.gaiaorbit.desktop.util.camera.CamRecorder;
 import gaia.cu9.ari.gaiaorbit.event.EventManager;
 import gaia.cu9.ari.gaiaorbit.event.Events;
@@ -50,8 +45,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
 import java.util.Properties;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Main class for the desktop launcher
@@ -61,8 +54,15 @@ import java.util.concurrent.TimeUnit;
 public class GaiaSkyDesktop implements IObserver {
     private static final Log logger = Logger.getLogger(GaiaSkyDesktop.class);
 
-    /* Configuration file version of the source code */
-    public static int SOURCE_CONF_VERSION = 260;
+    /*
+    * Configuration file version of the source code
+    * This is usually tag where each chunk takes 2 spaces.
+    * Version = major.minor.rev -> 1.2.5 major=1; minor=2; rev=5
+    * Version = major * 10000 + minor * 100 + rev
+    * So 1.2.5 -> 010205
+    *    2.1.7 -> 020107
+    */
+    public static int SOURCE_CONF_VERSION = 020200;
     private static GaiaSkyDesktop gsd;
     private static boolean REST_ENABLED = false;
     private static Class<?> REST_SERVER_CLASS = null;
@@ -75,39 +75,34 @@ public class GaiaSkyDesktop implements IObserver {
      * @author Toni Sagrista
      */
     private static class GaiaSkyArgs {
-        @Parameter(names = {"-h", "--help"}, description = "Show program options and usage information", help = true, order = 0)
-        private boolean help = false;
+        @Parameter(names = { "-h", "--help" }, description = "Show program options and usage information", help = true, order = 0) private boolean help = false;
 
-        @Parameter(names = {"-v", "--version"}, description = "List Gaia Sky version and relevant information.", order = 1)
-        private boolean version = false;
+        @Parameter(names = { "-v", "--version" }, description = "List Gaia Sky version and relevant information.", order = 1) private boolean version = false;
 
-        @Parameter(names = {"-d", "--ds-download"}, description = "Display the data download dialog at startup. If no data is found, the download dialog is shown automatically.", order = 2)
-        private boolean download = false;
+        @Parameter(names = { "-d", "--ds-download" }, description = "Display the data download dialog at startup. If no data is found, the download dialog is shown automatically.", order = 2) private boolean download = false;
 
-        @Parameter(names = {"-c", "--cat-chooser"}, description = "Display the catalog chooser dialog at startup. This enables the selection of different available catalogs when Gaia Sky starts.", order = 3)
-        private boolean catalogChooser = false;
+        @Parameter(names = { "-c", "--cat-chooser" }, description = "Display the catalog chooser dialog at startup. This enables the selection of different available catalogs when Gaia Sky starts.", order = 3) private boolean catalogChooser = false;
 
-        @Parameter(names = {"-p", "--properties"}, description = "Specify the location of the properties file.", order = 4)
-        private String propertiesFile = null;
+        @Parameter(names = { "-p", "--properties" }, description = "Specify the location of the properties file.", order = 4) private String propertiesFile = null;
 
-        @Parameter(names = {"-a", "--assets"}, description = "Specify the location of the assets folder. If not present, the default assets location is used.", order = 5)
-        private String assetsLocation = null;
+        @Parameter(names = { "-a", "--assets" }, description = "Specify the location of the assets folder. If not present, the default assets location is used.", order = 5) private String assetsLocation = null;
     }
 
     /**
      * Formats the regular usage so that it removes the left padding characters.
      * This is necessary so that help2man recognizes the OPTIONS block.
+     *
      * @param jc The JCommander object
      */
-    private static void printUsage(JCommander jc){
+    private static void printUsage(JCommander jc) {
         StringBuilder sb = new StringBuilder();
         jc.usage(sb, "");
         String usage = sb.toString();
 
         sb = new StringBuilder();
         String[] lines = usage.split("\n");
-        for(int i =0; i < lines.length; i++){
-            if(i==0){
+        for (int i = 0; i < lines.length; i++) {
+            if (i == 0) {
                 // Add extra line between usage and options
                 sb.append(lines[i] + "\n\n");
             } else {
@@ -119,6 +114,7 @@ public class GaiaSkyDesktop implements IObserver {
 
     /**
      * Main method
+     *
      * @param args Arguments
      */
     public static void main(String[] args) {
@@ -152,7 +148,7 @@ public class GaiaSkyDesktop implements IObserver {
             }
 
             gsd = new GaiaSkyDesktop();
-            
+
             Gdx.files = new Lwjgl3Files();
 
             // Initialize number format
@@ -179,7 +175,7 @@ public class GaiaSkyDesktop implements IObserver {
             GlobalConf.screen.SCREEN_HEIGHT = 1200;
 
             // Reinitialize with user-defined locale
-            I18n.initialize(Gdx.files.absolute(GlobalConf.ASSETS_LOC + "i18n/gsbundle"));
+            I18n.initialize(Gdx.files.absolute(GlobalConf.ASSETS_LOC + File.separator + "i18n/gsbundle"));
 
             if (gsargs.version) {
                 System.out.println(GlobalConf.getShortApplicationName());
@@ -224,25 +220,21 @@ public class GaiaSkyDesktop implements IObserver {
             // Network checker
             NetworkCheckerManager.initialize(new DesktopNetworkChecker());
 
-            // Analytics
-            AnalyticsReporting.initialize(new AnalyticsPermission());
-            AnalyticsReporting.getInstance().sendStartAppReport();
-
             // Math
             MathManager.initialize();
 
             gsd.init();
         } catch (Exception e) {
-            e.printStackTrace(System.err);
+            CrashReporter.reportCrash(e, logger);
         }
 
     }
 
-    private ConsoleLogger clogger;
+    private ConsoleLogger consoleLogger;
 
     public GaiaSkyDesktop() {
         super();
-        clogger = new ConsoleLogger();
+        consoleLogger = new ConsoleLogger();
         EventManager.instance.subscribe(this, Events.SCENE_GRAPH_LOADED, Events.DISPOSE);
     }
 
@@ -257,10 +249,14 @@ public class GaiaSkyDesktop implements IObserver {
         cfg.useVsync(false);
         cfg.setWindowedMode(GlobalConf.screen.SCREEN_WIDTH, GlobalConf.screen.SCREEN_HEIGHT);
         cfg.setResizable(true);
+        cfg.setWindowIcon(Files.FileType.Internal, "icon/ic_launcher.png");
+        cfg.useOpenGL3(true, 3, 2);
+        // Disable logical DPI modes (macOS, Windows)
+        cfg.setHdpiMode(Lwjgl3ApplicationConfiguration.HdpiMode.Pixels);
 
-        if (clogger != null) {
-            clogger.unsubscribe();
-            clogger = null;
+        if (consoleLogger != null) {
+            consoleLogger.unsubscribe();
+            consoleLogger = null;
         }
 
         // Launch app
@@ -271,34 +267,34 @@ public class GaiaSkyDesktop implements IObserver {
     @Override
     public void notify(Events event, final Object... data) {
         switch (event) {
-            case SCENE_GRAPH_LOADED:
-                if (REST_ENABLED) {
-                    /*
-                     * Notify REST server that GUI is loaded and everything should be in a
-                     * well-defined state
-                     */
-                    Method activate;
-                    try {
-                        activate = REST_SERVER_CLASS.getMethod("activate");
-                        activate.invoke(null, new Object[0]);
-                    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        logger.error(e);
-                    }
+        case SCENE_GRAPH_LOADED:
+            if (REST_ENABLED) {
+                /*
+                 * Notify REST server that GUI is loaded and everything should be in a
+                 * well-defined state
+                 */
+                Method activate;
+                try {
+                    activate = REST_SERVER_CLASS.getMethod("activate");
+                    activate.invoke(null, new Object[0]);
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    logger.error(e);
                 }
-                break;
-            case DISPOSE:
-                if (REST_ENABLED) {
-                    /* Shutdown REST server thread on termination */
-                    try {
-                        Method stop = REST_SERVER_CLASS.getMethod("stop");
-                        stop.invoke(null, new Object[0]);
-                    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        logger.error(e);
-                    }
+            }
+            break;
+        case DISPOSE:
+            if (REST_ENABLED) {
+                /* Shutdown REST server thread on termination */
+                try {
+                    Method stop = REST_SERVER_CLASS.getMethod("stop");
+                    stop.invoke(null, new Object[0]);
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    logger.error(e);
                 }
-                break;
-            default:
-                break;
+            }
+            break;
+        default:
+            break;
         }
 
     }
@@ -441,17 +437,6 @@ public class GaiaSkyDesktop implements IObserver {
         @Override
         public void dispose() {
             // Terminate here
-
-            // Analytics stop event
-            Future<GoogleAnalyticsResponse> f1 = AnalyticsReporting.getInstance().sendTimingAppReport();
-
-            if (f1 != null)
-                try {
-                    f1.get(2000, TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    logger.error(e);
-                }
-
         }
     }
 }

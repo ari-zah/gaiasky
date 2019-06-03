@@ -11,10 +11,10 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
 import gaia.cu9.ari.gaiaorbit.util.gravwaves.RelativisticEffectsManager;
-import gaia.cu9.ari.gaiaorbit.util.override.Matrix3Attribute;
-import gaia.cu9.ari.gaiaorbit.util.override.RelativisticEffectFloatAttribute;
-import gaia.cu9.ari.gaiaorbit.util.override.Vector3Attribute;
-import gaia.cu9.ari.gaiaorbit.util.override.Vector4Attribute;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.Matrix3Attribute;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.RelativisticEffectFloatAttribute;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.Vector3Attribute;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.Vector4Attribute;
 
 import java.util.Map;
 import java.util.Set;

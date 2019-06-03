@@ -5,7 +5,6 @@
 
 package gaia.cu9.ari.gaiaorbit.render.system;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
@@ -16,23 +15,19 @@ import gaia.cu9.ari.gaiaorbit.render.IPointRenderable;
 import gaia.cu9.ari.gaiaorbit.render.IRenderable;
 import gaia.cu9.ari.gaiaorbit.scenegraph.SceneGraphNode.RenderGroup;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
 
 public class PointRenderSystem extends ImmediateRenderSystem {
-    protected static final int N_MESHDATA = 100;
     protected ICamera camera;
     protected int glType;
     private int sizeOffset;
 
     protected Vector3 aux2;
 
-    private Runnable[] depth, blend;
-
     public PointRenderSystem(RenderGroup rg, float[] alphas, ShaderProgram[] shaders) {
         super(rg, alphas, shaders, -1);
         glType = GL20.GL_POINTS;
         aux2 = new Vector3();
-        depth = new Runnable[N_MESHDATA];
-        blend = new Runnable[N_MESHDATA];
     }
 
     @Override
@@ -42,16 +37,36 @@ public class PointRenderSystem extends ImmediateRenderSystem {
     @Override
     protected void initVertices() {
         meshes = new Array<>();
-
-        // ORIGINAL POINTS
-        int idx = createMeshData();
-        curr = meshes.get(idx);
-
-        meshIdx = 0;
+        initVertices(meshIdx++);
     }
 
+    private void initVertices(int index) {
+        if (index >= meshes.size) {
+            meshes.setSize(index + 1);
+        }
+        if (meshes.get(index) == null) {
+            if (index > 0)
+                logger.info("Capacity too small, creating new meshdata: " + curr.capacity);
+            curr = new MeshData();
+            meshes.set(index, curr);
+
+            curr.capacity = 1000;
+
+            VertexAttribute[] attribs = buildVertexAttributes();
+            curr.mesh = new IntMesh(false, curr.capacity, 0, attribs);
+
+            curr.vertexSize = curr.mesh.getVertexAttributes().vertexSize / 4;
+            curr.vertices = new float[curr.capacity * curr.vertexSize];
+            curr.colorOffset = curr.mesh.getVertexAttribute(Usage.ColorPacked) != null ? curr.mesh.getVertexAttribute(Usage.ColorPacked).offset / 4 : 0;
+            sizeOffset = curr.mesh.getVertexAttribute(Usage.Generic).offset / 4;
+        } else {
+            curr = meshes.get(index);
+        }
+    }
+
+
     protected VertexAttribute[] buildVertexAttributes() {
-        Array<VertexAttribute> attribs = new Array<VertexAttribute>();
+        Array<VertexAttribute> attribs = new Array<>();
         attribs.add(new VertexAttribute(Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE));
         attribs.add(new VertexAttribute(Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE));
         attribs.add(new VertexAttribute(Usage.Generic, 1, "a_size"));
@@ -79,26 +94,28 @@ public class PointRenderSystem extends ImmediateRenderSystem {
             renderable.blend();
             renderable.depth();
 
-            curr.mesh.setVertices(curr.vertices, 0, curr.vertexIdx);
-            curr.mesh.render(shaderProgram, glType);
+            for (int md = 0; md < meshIdx; md++) {
+                MeshData meshd = meshes.get(md);
+                meshd.mesh.setVertices(meshd.vertices, 0, meshd.vertexIdx);
+                meshd.mesh.render(shaderProgram, glType);
 
-            // Clear for next cycle
-            curr.clear();
+                meshd.clear();
+            }
         }
         shaderProgram.end();
 
-    }
-
-    private void run(Runnable[] r, int i) {
-        if (i >= 0 && i < r.length && r[i] != null)
-            r[i].run();
-    }
-
-    public void addPoint(IPointRenderable pr, double x, double y, double z, float pointSize, Color col) {
-        addPoint(pr, x, y, z, pointSize, col.r, col.g, col.b, col.a);
+        // Reset indices
+        meshIdx = 1;
+        curr = meshes.get(0);
     }
 
     public void addPoint(IPointRenderable pr, double x, double y, double z, float pointSize, float r, float g, float b, float a) {
+        // Check if 3 more indices fit
+        if (curr.numVertices + 1 >= curr.capacity) {
+            // Create new mesh data
+            initVertices(meshIdx++);
+        }
+
         color(r, g, b, a);
         size(pointSize);
         vertex((float) x, (float) y, (float) z);
@@ -108,11 +125,4 @@ public class PointRenderSystem extends ImmediateRenderSystem {
         curr.vertices[curr.vertexIdx + sizeOffset] = pointSize;
     }
 
-    public void addBlend(Runnable b) {
-        blend[meshIdx] = b;
-    }
-
-    public void addDepth(Runnable d) {
-        depth[meshIdx] = d;
-    }
 }

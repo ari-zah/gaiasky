@@ -24,6 +24,7 @@ import gaia.cu9.ari.gaiaorbit.util.format.DateFormatFactory;
 import gaia.cu9.ari.gaiaorbit.util.format.DateFormatFactory.DateType;
 import gaia.cu9.ari.gaiaorbit.util.format.IDateFormat;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
+import gaia.cu9.ari.gaiaorbit.util.update.VersionChecker;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -51,7 +52,8 @@ public class GlobalConf {
     public static final String AUTHOR_AFFILIATION = "Heidelberg University, Zentrum fuer Astronomie, Astronomisches Rechen-Institut";
 
     // Assets location for this instance of Gaia Sky
-    public static final String ASSETS_LOC = System.getProperty("assets.location") != null ? System.getProperty("assets.location") : "";
+    // macOS needs fully qualified paths when run as an app (GaiaSky.app), that's why we use the getAbsolutePath() part
+    public static final String ASSETS_LOC = (new File(System.getProperty("assets.location") != null ? System.getProperty("assets.location") : ".")).getAbsolutePath();
 
     // Scale factor
     public static float SCALE_FACTOR = -1.0f;
@@ -61,7 +63,7 @@ public class GlobalConf {
         logger.debug("GUI scale factor set to " + GlobalConf.SCALE_FACTOR);
     }
 
-    public static interface IConf {
+    public interface IConf {
     }
 
     public enum ScreenshotMode {
@@ -490,7 +492,7 @@ public class GlobalConf {
         public CameraKeyframeManager.PathType KF_PATH_TYPE_ORIENTATION;
 
         public FrameConf() {
-            EventManager.instance.subscribe(this, Events.CONFIG_FRAME_OUTPUT, Events.FRAME_OUTPUT_CMD);
+            EventManager.instance.subscribe(this, Events.CONFIG_FRAME_OUTPUT_CMD, Events.FRAME_OUTPUT_CMD);
         }
 
         public boolean isSimpleMode() {
@@ -521,7 +523,7 @@ public class GlobalConf {
         @Override
         public void notify(Events event, Object... data) {
             switch (event) {
-            case CONFIG_FRAME_OUTPUT:
+            case CONFIG_FRAME_OUTPUT_CMD:
                 boolean updateFrameSize = RENDER_WIDTH != (int) data[0] || RENDER_HEIGHT != (int) data[1];
                 RENDER_WIDTH = (int) data[0];
                 RENDER_HEIGHT = (int) data[1];
@@ -531,6 +533,22 @@ public class GlobalConf {
 
                 if (updateFrameSize) {
                     EventManager.instance.post(Events.FRAME_SIZE_UDPATE, RENDER_WIDTH, RENDER_HEIGHT);
+                }
+                break;
+            case FRAME_OUTPUT_MODE_CMD:
+                Object newMode = data[0];
+                ScreenshotMode mode = null;
+                if(newMode instanceof String){
+                    try {
+                        mode = ScreenshotMode.valueOf((String) newMode);
+                    }catch(IllegalArgumentException e){
+                        logger.error("Given value is not a representation of ScreenshotMode (simple|redraw): '" + newMode + "'");
+                    }
+                } else {
+                    mode = (ScreenshotMode) newMode;
+                }
+                if(mode != null){
+                    FRAME_MODE = mode;
                 }
                 break;
             case FRAME_OUTPUT_CMD:
@@ -745,7 +763,6 @@ public class GlobalConf {
         public float STEREOSCOPIC_EYE_SEPARATION_M = 0.06f;
         /** This controls the side of the images in the stereoscopic mode **/
         public StereoProfile STEREO_PROFILE = StereoProfile.VR_HEADSET;
-        public boolean ANALYTICS_ENABLED;
         /**
          * Whether to display the dataset dialog at startup or not
          **/
@@ -755,7 +772,7 @@ public class GlobalConf {
             EventManager.instance.subscribe(this, Events.STEREOSCOPIC_CMD, Events.STEREO_PROFILE_CMD, Events.CUBEMAP360_CMD, Events.CUBEMAP_PROJECTION_CMD);
         }
 
-        public void initialize(boolean dISPLAY_TUTORIAL, String tUTORIAL_POINTER_SCRIPT_LOCATION, String tUTORIAL_SCRIPT_LOCATION, boolean sHOW_DEBUG_INFO, Instant lAST_CHECKED, String lAST_VERSION, String vERSION_CHECK_URL, String dATA_DESCRIPTOR_URL, String uI_THEME, String sCRIPT_LOCATION, int rEST_PORT, String lOCALE, boolean sTEREOSCOPIC_MODE, StereoProfile sTEREO_PROFILE, boolean cUBEMAP360_MODE, boolean aNALYTICS_ENABLED, boolean dISPLAY_HUD, boolean dISPLAY_POINTER_COORDS,
+        public void initialize(boolean dISPLAY_TUTORIAL, String tUTORIAL_POINTER_SCRIPT_LOCATION, String tUTORIAL_SCRIPT_LOCATION, boolean sHOW_DEBUG_INFO, Instant lAST_CHECKED, String lAST_VERSION, String vERSION_CHECK_URL, String dATA_DESCRIPTOR_URL, String uI_THEME, String sCRIPT_LOCATION, int rEST_PORT, String lOCALE, boolean sTEREOSCOPIC_MODE, StereoProfile sTEREO_PROFILE, boolean cUBEMAP360_MODE, boolean dISPLAY_HUD, boolean dISPLAY_POINTER_COORDS,
                 boolean dISPLAY_DATASET_DIALOG, boolean nET_MASTER, boolean nET_SLAVE, List<String> nET_MASTER_SLAVES) {
             DISPLAY_TUTORIAL = dISPLAY_TUTORIAL;
             TUTORIAL_POINTER_SCRIPT_LOCATION = tUTORIAL_POINTER_SCRIPT_LOCATION;
@@ -772,7 +789,6 @@ public class GlobalConf {
             STEREOSCOPIC_MODE = sTEREOSCOPIC_MODE;
             STEREO_PROFILE = sTEREO_PROFILE;
             CUBEMAP360_MODE = cUBEMAP360_MODE;
-            ANALYTICS_ENABLED = aNALYTICS_ENABLED;
             DISPLAY_HUD = dISPLAY_HUD;
             DISPLAY_POINTER_COORDS = dISPLAY_POINTER_COORDS;
             DISPLAY_DATASET_DIALOG = dISPLAY_DATASET_DIALOG;
@@ -791,7 +807,7 @@ public class GlobalConf {
         }
 
         public String getLastCheckedString() {
-            IDateFormat df = DateFormatFactory.getFormatter(I18n.locale, DateType.DATE);
+            IDateFormat df = DateFormatFactory.getFormatter(I18n.locale, DateType.DATETIME);
             return df.format(VERSION_LAST_TIME);
         }
 
@@ -876,6 +892,7 @@ public class GlobalConf {
 
     public static class VersionConf implements IConf {
         public String version;
+        public int versionNumber;
         public Instant buildtime;
         public String builder;
         public String system;
@@ -883,6 +900,7 @@ public class GlobalConf {
 
         public void initialize(String version, Instant buildtime, String builder, String system, String build) {
             this.version = version;
+            this.versionNumber = VersionChecker.stringToVersionNumber(version);
             this.buildtime = buildtime;
             this.builder = builder;
             this.system = system;
@@ -935,10 +953,6 @@ public class GlobalConf {
         public int SHADOW_MAPPING_RESOLUTION;
 
         /**
-         * Whether to display proper motion vectors
-         **/
-        public boolean PROPER_MOTION_VECTORS;
-        /**
          * Factor to apply to the length of the proper motion vectors
          **/
         public float PM_LEN_FACTOR;
@@ -964,6 +978,11 @@ public class GlobalConf {
          * </ul>
          */
         public int PM_COLOR_MODE;
+
+        /**
+         * Whether to show arrow caps or not
+         */
+        public boolean PM_ARROWHEADS;
 
         public boolean STAR_COLOR_TRANSIT;
         public boolean ONLY_OBSERVED_STARS;
@@ -1051,11 +1070,11 @@ public class GlobalConf {
         public long MAX_LOADED_STARS;
 
         public SceneConf() {
-            EventManager.instance.subscribe(this, Events.TOGGLE_VISIBILITY_CMD, Events.FOCUS_LOCK_CMD, Events.ORIENTATION_LOCK_CMD, Events.PROPER_MOTIONS_CMD, Events.STAR_BRIGHTNESS_CMD, Events.PM_LEN_FACTOR_CMD, Events.PM_NUM_FACTOR_CMD, Events.PM_COLOR_MODE_CMD, Events.FOV_CHANGED_CMD, Events.CAMERA_SPEED_CMD, Events.ROTATION_SPEED_CMD, Events.TURNING_SPEED_CMD, Events.SPEED_LIMIT_CMD, Events.TRANSIT_COLOUR_CMD, Events.ONLY_OBSERVED_STARS_CMD, Events.COMPUTE_GAIA_SCAN_CMD, Events.OCTREE_PARTICLE_FADE_CMD, Events.STAR_POINT_SIZE_CMD, Events.STAR_POINT_SIZE_INCREASE_CMD, Events.STAR_POINT_SIZE_DECREASE_CMD, Events.STAR_POINT_SIZE_RESET_CMD, Events.STAR_MIN_OPACITY_CMD, Events.AMBIENT_LIGHT_CMD, Events.GALAXY_3D_CMD, Events.CROSSHAIR_CMD, Events.CAMERA_CINEMATIC_CMD, Events.CUBEMAP_RESOLUTION_CMD, Events.LABEL_SIZE_CMD);
+            EventManager.instance.subscribe(this, Events.TOGGLE_VISIBILITY_CMD, Events.FOCUS_LOCK_CMD, Events.ORIENTATION_LOCK_CMD, Events.STAR_BRIGHTNESS_CMD, Events.PM_LEN_FACTOR_CMD, Events.PM_NUM_FACTOR_CMD, Events.PM_COLOR_MODE_CMD, Events.PM_ARROWHEADS_CMD, Events.FOV_CHANGED_CMD, Events.CAMERA_SPEED_CMD, Events.ROTATION_SPEED_CMD, Events.TURNING_SPEED_CMD, Events.SPEED_LIMIT_CMD, Events.TRANSIT_COLOUR_CMD, Events.ONLY_OBSERVED_STARS_CMD, Events.COMPUTE_GAIA_SCAN_CMD, Events.OCTREE_PARTICLE_FADE_CMD, Events.STAR_POINT_SIZE_CMD, Events.STAR_POINT_SIZE_INCREASE_CMD, Events.STAR_POINT_SIZE_DECREASE_CMD, Events.STAR_POINT_SIZE_RESET_CMD, Events.STAR_MIN_OPACITY_CMD, Events.AMBIENT_LIGHT_CMD, Events.GALAXY_3D_CMD, Events.CROSSHAIR_CMD, Events.CAMERA_CINEMATIC_CMD, Events.CUBEMAP_RESOLUTION_CMD, Events.LABEL_SIZE_CMD);
         }
 
         public void initialize(int gRAPHICS_QUALITY, long oBJECT_FADE_MS, float sTAR_BRIGHTNESS, float aMBIENT_LIGHT, int cAMERA_FOV, float cAMERA_SPEED, float tURNING_SPEED, float rOTATION_SPEED, int cAMERA_SPEED_LIMIT_IDX, boolean fOCUS_LOCK, boolean fOCUS_LOCK_ORIENTATION, float lABEL_SIZE_FACTOR, float lABEL_NUMBER_FACTOR, boolean[] vISIBILITY, int oRBIT_RENDERER, int lINE_RENDERER, double sTAR_TH_ANGLE_NONE, double sTAR_TH_ANGLE_POINT, double sTAR_TH_ANGLE_QUAD, float pOINT_ALPHA_MIN,
-                float pOINT_ALPHA_MAX, boolean oCTREE_PARTICLE_FADE, float oCTANT_TH_ANGLE_0, float oCTANT_TH_ANGLE_1, boolean pROPER_MOTION_VECTORS, float pM_NUM_FACTOR, float pM_LEN_FACTOR, long n_PM_STARS, int pM_COLOR_MODE, float sTAR_POINT_SIZE, boolean gALAXY_3D, int cUBEMAP_FACE_RESOLUTION, boolean cROSSHAIR, boolean cINEMATIC_CAMERA, boolean lAZY_TEXTURE_INIT, boolean fREE_CAMERA_TARGET_MODE_ON, boolean sHADOW_MAPPING, int sHADOW_MAPPING_N_SHADOWS, int sHADOW_MAPPING_RESOLUTION,
+                float pOINT_ALPHA_MAX, boolean oCTREE_PARTICLE_FADE, float oCTANT_TH_ANGLE_0, float oCTANT_TH_ANGLE_1, float pM_NUM_FACTOR, float pM_LEN_FACTOR, long n_PM_STARS, int pM_COLOR_MODE, boolean pM_ARROWHEADS, float sTAR_POINT_SIZE, boolean gALAXY_3D, int cUBEMAP_FACE_RESOLUTION, boolean cROSSHAIR, boolean cINEMATIC_CAMERA, boolean lAZY_TEXTURE_INIT, boolean fREE_CAMERA_TARGET_MODE_ON, boolean sHADOW_MAPPING, int sHADOW_MAPPING_N_SHADOWS, int sHADOW_MAPPING_RESOLUTION,
                 long mAX_LOADED_STARS) {
             GRAPHICS_QUALITY = gRAPHICS_QUALITY;
             OBJECT_FADE_MS = oBJECT_FADE_MS;
@@ -1083,11 +1102,11 @@ public class GlobalConf {
             OCTREE_PARTICLE_FADE = oCTREE_PARTICLE_FADE;
             OCTANT_THRESHOLD_0 = oCTANT_TH_ANGLE_0;
             OCTANT_THRESHOLD_1 = oCTANT_TH_ANGLE_1;
-            PROPER_MOTION_VECTORS = pROPER_MOTION_VECTORS;
             PM_NUM_FACTOR = pM_NUM_FACTOR;
             PM_LEN_FACTOR = pM_LEN_FACTOR;
             N_PM_STARS = n_PM_STARS;
             PM_COLOR_MODE = pM_COLOR_MODE;
+            PM_ARROWHEADS = pM_ARROWHEADS;
             STAR_POINT_SIZE = sTAR_POINT_SIZE;
             STAR_POINT_SIZE_BAK = STAR_POINT_SIZE;
             GALAXY_3D = gALAXY_3D;
@@ -1180,7 +1199,9 @@ public class GlobalConf {
                     state = (Boolean) data[2];
                 }
                 ComponentType ct = ComponentType.getFromKey(key);
-                VISIBILITY[ct.ordinal()] = (state != null ? state : !VISIBILITY[ct.ordinal()]);
+                if(ct != null) {
+                    VISIBILITY[ct.ordinal()] = (state != null ? state : !VISIBILITY[ct.ordinal()]);
+                }
                 break;
             case TRANSIT_COLOUR_CMD:
                 STAR_COLOR_TRANSIT = (boolean) data[1];
@@ -1216,6 +1237,9 @@ public class GlobalConf {
             case PM_COLOR_MODE_CMD:
                 PM_COLOR_MODE = MathUtilsd.clamp((int) data[0], 0, 5);
                 break;
+            case PM_ARROWHEADS_CMD:
+                PM_ARROWHEADS = (boolean) data[0];
+                break;
 
             case CAMERA_SPEED_CMD:
                 CAMERA_SPEED = (float) data[0];
@@ -1232,9 +1256,6 @@ public class GlobalConf {
                 break;
             case OCTREE_PARTICLE_FADE_CMD:
                 OCTREE_PARTICLE_FADE = (boolean) data[1];
-                break;
-            case PROPER_MOTIONS_CMD:
-                PROPER_MOTION_VECTORS = (boolean) data[1];
                 break;
             case STAR_POINT_SIZE_CMD:
                 STAR_POINT_SIZE = (float) data[0];

@@ -57,7 +57,7 @@ public class MinimapWindow extends GenericDialog {
         setCancelText(I18n.txt("gui.close"));
 
         // Init scales
-        scales = new Array<IMinimapScale>();
+        scales = new Array<>();
 
         MilkyWayMinimapScale mmms = new MilkyWayMinimapScale();
         mmms.initialize(ortho, sb, sr, font, side, sideshort);

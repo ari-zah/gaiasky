@@ -9,12 +9,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
@@ -31,20 +31,21 @@ import gaia.cu9.ari.gaiaorbit.data.group.IStarGroupDataProvider;
 import gaia.cu9.ari.gaiaorbit.event.EventManager;
 import gaia.cu9.ari.gaiaorbit.event.Events;
 import gaia.cu9.ari.gaiaorbit.event.IObserver;
-import gaia.cu9.ari.gaiaorbit.render.ILineRenderable;
-import gaia.cu9.ari.gaiaorbit.render.IModelRenderable;
-import gaia.cu9.ari.gaiaorbit.render.IQuadRenderable;
-import gaia.cu9.ari.gaiaorbit.render.RenderingContext;
+import gaia.cu9.ari.gaiaorbit.render.*;
 import gaia.cu9.ari.gaiaorbit.render.system.FontRenderSystem;
 import gaia.cu9.ari.gaiaorbit.render.system.LineRenderSystem;
+import gaia.cu9.ari.gaiaorbit.scenegraph.camera.CameraManager;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.CameraManager.CameraMode;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.FovCamera;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
 import gaia.cu9.ari.gaiaorbit.scenegraph.component.ModelComponent;
-import gaia.cu9.ari.gaiaorbit.util.ModelCache;
 import gaia.cu9.ari.gaiaorbit.util.*;
 import gaia.cu9.ari.gaiaorbit.util.color.ColourUtils;
 import gaia.cu9.ari.gaiaorbit.util.coord.AstroUtils;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
 import gaia.cu9.ari.gaiaorbit.util.gravwaves.RelativisticEffectsManager;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
@@ -186,8 +187,8 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
             params.put("diameter", 1d);
             params.put("flip", false);
 
-            Pair<Model, Map<String, Material>> pair = ModelCache.cache.getModel("sphere", params, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
-            Model model = pair.getFirst();
+            Pair<IntModel, Map<String, Material>> pair = ModelCache.cache.getModel("sphere", params, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
+            IntModel model = pair.getFirst();
             Material mat = pair.getSecond().get("base");
             mat.clear();
             mat.set(new TextureAttribute(TextureAttribute.Diffuse, tex));
@@ -201,7 +202,7 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
             mc.env = new Environment();
             mc.env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
             mc.env.set(new FloatAttribute(FloatAttribute.Shininess, 0f));
-            mc.instance = new ModelInstance(model, modelTransform);
+            mc.instance = new IntModelInstance(model, modelTransform);
             // Relativistic effects
             if (GlobalConf.runtime.RELATIVISTIC_ABERRATION)
                 mc.rec.setUpRelativisticEffectsMaterial(mc.instance.materials);
@@ -528,7 +529,7 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
         addToRender(this, RenderGroup.STAR_GROUP);
         addToRender(this, RenderGroup.BILLBOARD_STAR);
         addToRender(this, RenderGroup.MODEL_STAR);
-        if (GlobalConf.scene.PROPER_MOTION_VECTORS) {
+        if (SceneGraphRenderer.instance.isOn(ComponentTypes.ComponentType.VelocityVectors)) {
             addToRender(this, RenderGroup.LINE);
             addToRender(this, RenderGroup.LINE);
         }
@@ -541,7 +542,7 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
      * Quad rendering
      */
     @Override
-    public void render(ShaderProgram shader, float alpha, Mesh mesh, ICamera camera) {
+    public void render(ShaderProgram shader, float alpha, IntMesh mesh, ICamera camera) {
         double thpointTimesFovfactor = GlobalConf.scene.STAR_THRESHOLD_POINT * camera.getFovFactor() * .5e-1f;
         double thupOverFovfactor = Constants.THRESHOLD_UP / camera.getFovFactor();
         double thdownOverFovfactor = Constants.THRESHOLD_DOWN / camera.getFovFactor();
@@ -568,7 +569,7 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
 
     Color c = new Color();
 
-    private void renderCloseupStar(int idx, ICamera camera, ShaderProgram shader, Mesh mesh, double thpointTimesFovfactor, double thupOverFovfactor, double thdownOverFovfactor, float alpha) {
+    private void renderCloseupStar(int idx, ICamera camera, ShaderProgram shader, IntMesh mesh, double thpointTimesFovfactor, double thupOverFovfactor, double thdownOverFovfactor, float alpha) {
         StarBean star = (StarBean) pointData.get(idx);
         double size = getSize(idx);
         double radius = size * Constants.STAR_SIZE_FACTOR;
@@ -614,7 +615,7 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
      * Model rendering
      */
     @Override
-    public void render(ModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
+    public void render(IntModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
         mc.touch();
         float opct = (float) MathUtilsd.lint(closestDist, modelDist / 50f, modelDist, 1f, 0f);
         if (alpha * opct > 0) {
@@ -641,7 +642,8 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
      */
     @Override
     public void render(LineRenderSystem renderer, ICamera camera, float alpha) {
-        float thPointTimesFovfactor = (float) GlobalConf.scene.STAR_THRESHOLD_POINT * camera.getFovFactor();
+        alpha *= SceneGraphRenderer.instance.alphas[ComponentTypes.ComponentType.VelocityVectors.ordinal()];
+        float thPointTimesFovFactor = (float) GlobalConf.scene.STAR_THRESHOLD_POINT * camera.getFovFactor();
         int n = (int) Math.min(getMaxProperMotionLines(), pointData.size);
         for (int i = n - 1; i >= 0; i--) {
             StarBean star = (StarBean) pointData.get(active[i]);
@@ -654,10 +656,11 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
                 // Rest of attributes
                 float distToCamera = (float) lpos.len();
                 float viewAngle = (float) (((radius / distToCamera) / camera.getFovFactor()) * GlobalConf.scene.STAR_BRIGHTNESS);
-                if (viewAngle >= thPointTimesFovfactor / GlobalConf.scene.PM_NUM_FACTOR && (star.pmx() != 0 || star.pmy() != 0 || star.pmz() != 0)) {
+                if (viewAngle >= thPointTimesFovFactor / GlobalConf.scene.PM_NUM_FACTOR && (star.pmx() != 0 || star.pmy() != 0 || star.pmz() != 0)) {
 
                     Vector3d p1 = aux3d1.get().set(star.x() + pm.x, star.y() + pm.y, star.z() + pm.z).sub(camera.getPos());
                     Vector3d ppm = aux3d2.get().set(star.pmx(), star.pmy(), star.pmz()).scl(GlobalConf.scene.PM_LEN_FACTOR);
+                    double p1p2len = ppm.len();
                     Vector3d p2 = aux3d3.get().set(ppm).add(p1);
 
                     // Max speed in km/s, to normalize
@@ -667,10 +670,11 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
                     case 0:
                     default:
                         // DIRECTION
+                        // Normalize, each component is in [-1:1], map to [0:1] and to a color channel
                         ppm.nor();
-                        r = (float) ppm.x;
-                        g = (float) ppm.y;
-                        b = (float) ppm.z;
+                        r = (float) (ppm.x + 1d) / 2f;
+                        g = (float) (ppm.y + 1d) / 2f;
+                        b = (float) (ppm.z + 1d) / 2f;
                         break;
                     case 1:
                         // LENGTH
@@ -686,13 +690,13 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
                     case 2:
                         // HAS RADIAL VELOCITY - blue: stars with RV, red: stars without RV
                         if (star.radvel() != 0) {
-                            r = GlobalResources.gBlue[0] + 0.09f;
-                            g = GlobalResources.gBlue[1] + 0.09f;
-                            b = GlobalResources.gBlue[2] + 0.09f;
+                            r = GlobalResources.gBlue[0] + 0.2f;
+                            g = GlobalResources.gBlue[1] + 0.4f;
+                            b = GlobalResources.gBlue[2] + 0.4f;
                         } else {
-                            r = GlobalResources.gRed[0] + 0.09f;
-                            g = GlobalResources.gRed[1] + 0.09f;
-                            b = GlobalResources.gRed[2] + 0.09f;
+                            r = GlobalResources.gRed[0] + 0.4f;
+                            g = GlobalResources.gRed[1] + 0.2f;
+                            b = GlobalResources.gRed[2] + 0.2f;
                         }
                         break;
                     case 3:
@@ -730,13 +734,27 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
                         break;
                     case 5:
                         // SINGLE COLOR
-                        r = GlobalResources.gBlue[0] + 0.09f;
-                        g = GlobalResources.gBlue[1] + 0.09f;
-                        b = GlobalResources.gBlue[2] + 0.09f;
+                        r = GlobalResources.gBlue[0] + 0.2f;
+                        g = GlobalResources.gBlue[1] + 0.4f;
+                        b = GlobalResources.gBlue[2] + 0.4f;
                         break;
                     }
 
+                    // Clamp
+                    r = MathUtilsd.clamp(r, 0, 1);
+                    g = MathUtilsd.clamp(g, 0, 1);
+                    b = MathUtilsd.clamp(b, 0, 1);
+
                     renderer.addLine(this, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, r, g, b, alpha * this.opacity);
+                    if(GlobalConf.scene.PM_ARROWHEADS) {
+                        // Add Arrow cap
+                        Vector3d p3 = aux3d2.get().set(ppm).nor().scl(p1p2len * .86).add(p1);
+                        p3.rotate(p2, 30);
+                        renderer.addLine(this, p3.x, p3.y, p3.z, p2.x, p2.y, p2.z, r, g, b, alpha * this.opacity);
+                        p3.rotate(p2, -60);
+                        renderer.addLine(this, p3.x, p3.y, p3.z, p2.x, p2.y, p2.z, r, g, b, alpha * this.opacity);
+                    }
+
                 }
             }
         }
@@ -746,7 +764,7 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
 
     @Override
     public float getLineWidth() {
-        return 0.6f;
+        return 1.0f;
     }
 
     @Override
@@ -1096,12 +1114,13 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
                 Logger.getLogger(this.getClass().getSimpleName()).error(e);
             }
         }
-        // Dispose of GPU data
+        // Dispose of GPU datOLO
         EventManager.instance.post(Events.DISPOSE_STAR_GROUP_GPU_MESH, this.offset);
         // Data to be gc'd
         this.pointData = null;
         // Remove focus if needed
-        if (GaiaSky.instance.getCameraManager().getFocus() != null && GaiaSky.instance.getCameraManager().getFocus() == this) {
+        CameraManager cam = GaiaSky.instance.getCameraManager();
+        if (cam != null && cam.getFocus() != null && cam.getFocus() == this) {
             this.setFocusIndex(-1);
             EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
         }
@@ -1129,6 +1148,7 @@ public class StarGroup extends ParticleGroup implements ILineRenderable, IStarFo
         sg.setLabelposition(new double[] { 0.0, -5.0e7, -4e8 });
         sg.setCt("Stars");
         sg.setData(data);
+        sg.setVisible(true);
         sg.doneLoading(null);
         return sg;
     }

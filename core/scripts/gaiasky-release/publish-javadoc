@@ -1,0 +1,64 @@
+#!/bin/bash
+
+if [[ $# -eq 0 ]] ; then
+    echo "No arguments supplied:"
+    echo "Usage: $0 [tag|latest]"
+    exit 1
+fi
+
+if [[ $1 = "-h" ]] || [[ $1 = "--help" ]] ; then
+    echo "Usage: $0 [tag|latest]"
+    exit 1
+fi
+
+VERSION=$1
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SRCDIR=$GS/core/src/
+
+echo "Source location: $SRCDIR"
+
+# Prepare version
+if [[ $VERSION = "latest" ]] ; then
+    echo "Publishing latest version: master"
+    CO=master
+else
+    if cd $DIR ; git rev-list $VERSION.. >/dev/null
+    then
+        echo "Tag: $VERSION"
+        CO=$VERSION
+    else
+        echo "Tag $VERSION does not exist"
+        exit 1
+    fi
+fi
+
+git -C $SRCDIR checkout $CO
+
+# Generate javadoc
+mkdir -p "/tmp/javadoc/$VERSION"
+
+#CLASSPATH_LIB_DIR="$(find $GS/releases -maxdepth 1 -type d -name 'gaiasky-*' -print -quit)/lib"
+#echo "Using classpath: $CLASSPATH_LIB_DIR"
+#$JAVA_HOME/bin/javadoc -html4 -d "/tmp/javadoc/$VERSION" -sourcepath "$SRCDIR" -classpath "$CLASSPATH_LIB_DIR/*" -subpackages gaia
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javadoc -d "/tmp/javadoc/$VERSION" -sourcepath "$SRCDIR" -subpackages gaia
+
+
+# Copy to server
+echo "Copying directory /tmp/javadoc/$VERSION to tsagrista@mintaka:/dataB/gaiasky/docs/javadoc/$VERSION"
+    
+ssh tsagrista@mintaka "mkdir -p /dataB/gaiasky/docs/javadoc/$VERSION"
+( cd "/tmp/javadoc/$VERSION" ; rsync -r * "tsagrista@mintaka:/dataB/gaiasky/docs/javadoc/$VERSION" )
+
+# Clean up
+rm -rf /tmp/javadoc
+
+# Update listing
+COMMAND="~/bin/dir2html '/dataB/gaiasky/docs/javadoc/' '/javadoc' 'gaia.ari.uni-heidelberg.de/gaiasky' 'Gaia Sky javadoc'"
+echo "Running dir2html in javadoc folder in mintaka"
+ssh tsagrista@mintaka $COMMAND
+
+# Restore
+git -C "$SRCDIR" checkout master
+
+

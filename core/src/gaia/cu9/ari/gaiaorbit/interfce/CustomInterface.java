@@ -52,7 +52,7 @@ public class CustomInterface implements IObserver, IGuiInterface {
     }
 
     private void unsubscribe() {
-        EventManager.instance.unsubscribe(this, Events.ADD_CUSTOM_IMAGE, Events.ADD_CUSTOM_MESSAGE, Events.REMOVE_OBJECTS, Events.REMOVE_ALL_OBJECTS, Events.ADD_CUSTOM_TEXT);
+        EventManager.instance.removeAllSubscriptions(this);
     }
 
     private void initSizes(Skin skin) {

@@ -5,6 +5,8 @@
 
 package gaia.cu9.ari.gaiaorbit.event;
 
+import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
+
 /**
  * Contains all the events
  *
@@ -14,6 +16,19 @@ public enum Events {
     /**
      * Event names
      */
+
+    /**
+     * Expands a GUI pane. Contains its name
+     */
+    EXPAND_PANE_CMD,
+    /**
+     * Collapses a GUI pane. Contains its name
+     */
+    COLLAPSE_PANE_CMD,
+    /**
+     * Toggles the collapsed state of a GUI pane. Contains its name
+     */
+    TOGGLE_EXPANDCOLLAPSE_PANE_CMD,
     /**
      * Notifies of a change in the time, contains the Date object
      **/
@@ -211,11 +226,6 @@ public enum Events {
      * boolean indicating if this comes from the interface.
      */
     ORIENTATION_LOCK_CMD,
-    /**
-     * Contains the name, the boolean value and a boolean indicating if this
-     * comes from the interface
-     **/
-    PROPER_MOTIONS_CMD,
     /**
      * Contains a float with the intensity of the light between 0 and 1
      **/
@@ -692,6 +702,10 @@ public enum Events {
      */
     PM_COLOR_MODE_CMD,
     /**
+     * Show or hide arrow caps. Contains boolean with state and another if it comes from UI
+     */
+    PM_ARROWHEADS_CMD,
+    /**
      * Updates the screen mode according to whats in the
      * {@link gaia.cu9.ari.gaiaorbit.util.GlobalConf#screen} bean.
      **/
@@ -822,7 +836,11 @@ public enum Events {
      * Configures the render system. Contains width, height, FPS, folder and
      * file
      **/
-    CONFIG_FRAME_OUTPUT,
+    CONFIG_FRAME_OUTPUT_CMD,
+    /**
+     * Sets the frame output mode, either simple or redraw. Gets a string or a {@link GlobalConf.ScreenshotMode} object.
+     */
+    FRAME_OUTPUT_MODE_CMD,
     /**
      * Forces recalculation of main GUI window size
      **/

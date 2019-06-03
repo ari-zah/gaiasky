@@ -8,13 +8,13 @@ package gaia.cu9.ari.gaiaorbit.scenegraph;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
@@ -36,8 +36,12 @@ import gaia.cu9.ari.gaiaorbit.util.GlobalResources;
 import gaia.cu9.ari.gaiaorbit.util.ModelCache;
 import gaia.cu9.ari.gaiaorbit.util.Nature;
 import gaia.cu9.ari.gaiaorbit.util.coord.AstroUtils;
-import gaia.cu9.ari.gaiaorbit.util.g3d.MeshPartBuilder2;
-import gaia.cu9.ari.gaiaorbit.util.g3d.ModelBuilder2;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntMeshPartBuilder;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBuilder;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
 import gaia.cu9.ari.gaiaorbit.util.gravwaves.RelativisticEffectsManager;
 import gaia.cu9.ari.gaiaorbit.util.math.Intersectord;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
@@ -50,7 +54,7 @@ public class StarCluster extends AbstractPositionEntity implements IFocus, IProp
 
     private static final double TH_ANGLE = Math.toRadians(0.6);
     private static final double TH_ANGLE_OVERLAP = Math.toRadians(0.7);
-    private static Model model;
+    private static IntModel model;
     private static Matrix4 modelTransform;
     private static Texture clusterTex;
 
@@ -112,10 +116,10 @@ public class StarCluster extends AbstractPositionEntity implements IFocus, IProp
         }
         if (model == null) {
             Material mat = new Material(new BlendingAttribute(GL20.GL_ONE, GL20.GL_ONE), new ColorAttribute(ColorAttribute.Diffuse, col[0], col[1], col[2], col[3]));
-            ModelBuilder2 modelBuilder = ModelCache.cache.mb;
+            IntModelBuilder modelBuilder = ModelCache.cache.mb;
             modelBuilder.begin();
             // create part
-            MeshPartBuilder2 bPartBuilder = modelBuilder.part("sph", GL20.GL_LINES, Usage.Position, mat);
+            IntMeshPartBuilder bPartBuilder = modelBuilder.part("sph", GL20.GL_LINES, Usage.Position, mat);
             bPartBuilder.icosphere(1, 3, false, true);
 
             model = (modelBuilder.end());
@@ -130,7 +134,7 @@ public class StarCluster extends AbstractPositionEntity implements IFocus, IProp
         mc.env.add(mc.dlight);
         mc.env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         mc.env.set(new FloatAttribute(FloatAttribute.Shininess, 0.2f));
-        mc.instance = new ModelInstance(model, modelTransform);
+        mc.instance = new IntModelInstance(model, modelTransform);
 
         // Relativistic effects
         if (GlobalConf.runtime.RELATIVISTIC_ABERRATION)
@@ -215,7 +219,7 @@ public class StarCluster extends AbstractPositionEntity implements IFocus, IProp
      * Model rendering
      */
     @Override
-    public void render(ModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
+    public void render(IntModelBatch modelBatch, float alpha, double t, RenderingContext rc) {
         mc.touch();
         mc.setTransparency(alpha * opacity * fadeAlpha, GL20.GL_ONE, GL20.GL_ONE);
         mc.instance.transform.set(this.localTransform);
@@ -228,7 +232,7 @@ public class StarCluster extends AbstractPositionEntity implements IFocus, IProp
      * Billboard quad rendering
      */
     @Override
-    public void render(ShaderProgram shader, float alpha, Mesh mesh, ICamera camera) {
+    public void render(ShaderProgram shader, float alpha, IntMesh mesh, ICamera camera) {
         // Bind texture
         if (clusterTex != null) {
             clusterTex.bind(0);

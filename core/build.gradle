@@ -68,11 +68,11 @@ task run(dependsOn: jar, type: JavaExec, description: "Runs Gaia Sky") {
     // CMS GC
     //jvmArgs = ['-server', '-XX:+UseConcMarkSweepGC', '-XX:+UseParNewGC', '-XX:MaxGCPauseMillis=5', '-XX:+CMSParallelRemarkEnabled', '-XX:CMSInitiatingOccupancyFraction=60', '-XX:MaxTenuringThreshold=4', '-XX:MaxNewSize=384m', '-XX:NewSize=384m', '-XX:SurvivorRatio=12']
     // G1 GC
-    jvmArgs = [ '-XX:+UseG1GC' ]
-    //if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+    jvmArgs "-XX:+UseG1GC"
+    if (System.getProperty("os.name").toLowerCase().contains("mac")) {
     // Required to run lwjgl3 java apps on macOS
-    //     jvmArgs += " -XstartOnFirstThread"
-    //}
+         jvmArgs("-XstartOnFirstThread")
+    }
     // Verbose GC
     // jvmArgs = ['-verbose:gc']
     classpath = sourceSets.main.runtimeClasspath
@@ -98,10 +98,10 @@ task rund(dependsOn: jar, type: JavaExec, description: "Runs Gaia Sky - forces d
     // CMS GC
     //jvmArgs = ['-server', '-XX:+UseConcMarkSweepGC', '-XX:+UseParNewGC', '-XX:MaxGCPauseMillis=5', '-XX:+CMSParallelRemarkEnabled', '-XX:CMSInitiatingOccupancyFraction=60', '-XX:MaxTenuringThreshold=4', '-XX:MaxNewSize=384m', '-XX:NewSize=384m', '-XX:SurvivorRatio=12']
     // G1 GC
-    jvmArgs = [ '-XX:+UseG1GC' ]
+    jvmArgs "-XX:+UseG1GC"
     if (System.getProperty("os.name").toLowerCase().contains("mac")) {
          // Required to run lwjgl java apps on macOS
-         jvmArgs += "-XstartOnFirstThread"
+         jvmArgs("-XstartOnFirstThread")
     }
     // Verbose GC
     // jvmArgs = ['-verbose:gc']
@@ -213,16 +213,20 @@ task dist (dependsOn: gaiaskyJar, description: "Compiles the project, creates th
     doLast {
         // Version check
         String vsc = "${System.env.GS_JAVA_VERSION_CHECK}"
-        boolean javaVersionOk = JavaVersion.current() == JavaVersion.VERSION_1_8
+        boolean javaVersionOk = JavaVersion.current().isJava10Compatible()
         if(vsc.equalsIgnoreCase("false")){
             if(!javaVersionOk){
-                println("WARNING: Gaia Sky must be built with Java  " + JavaVersion.VERSION_1_8 + ", you are using " + JavaVersion.current())
+                println("WARNING: Gaia Sky must be built with Java " + JavaVersion.VERSION_1_10 + " or compatible, you are using " + JavaVersion.current())
             }
         } else {
             if(!javaVersionOk){
                 print("FAILURE: Do 'export GS_JAVA_VERSION_CHECK=false' to skip this check")
-                throw new GradleException("This built must be run with java " + JavaVersion.VERSION_1_8 + ", you are using " + JavaVersion.current())
+                throw new GradleException("Gaia Sky must be built with java " + JavaVersion.VERSION_1_10 + " or compatible, you are using " + JavaVersion.current())
             }
+        }
+
+        if(javaVersionOk){
+            println("OK: Building with Java " + JavaVersion.current())
         }
 
         // Copy conf

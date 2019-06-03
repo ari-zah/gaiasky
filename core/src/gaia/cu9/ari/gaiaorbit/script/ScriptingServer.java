@@ -70,7 +70,12 @@ public class ScriptingServer {
             };
             gatewayServer.addListener(listener);
         }
-        gatewayServer.start();
+        try {
+            gatewayServer.start();
+        }catch(Exception e){
+            logger.error("Could not initialize the Py4J gateway server, is there another instance of Gaia Sky running?");
+            logger.error(e);
+        }
     }
 
     public static void dispose() {

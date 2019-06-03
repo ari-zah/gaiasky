@@ -5,7 +5,7 @@
 
 package gaia.cu9.ari.gaiaorbit.render;
 
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
 
 /**
  * Interface to implement by all the entities that can be rendered as a model.
@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
  */
 public interface IModelRenderable extends IRenderable {
 
-    void render(ModelBatch modelBatch, float alpha, double t, RenderingContext rc);
+    void render(IntModelBatch modelBatch, float alpha, double t, RenderingContext rc);
 
     boolean hasAtmosphere();
 

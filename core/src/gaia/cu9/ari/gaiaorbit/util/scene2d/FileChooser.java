@@ -79,9 +79,9 @@ public class FileChooser extends GenericDialog {
     /** Filters files that appear in the file chooser. For internal use only! **/
     private FileFilter filter;
     /** Enables directories in the file chooser **/
-    private boolean directoryBrowsingEnabled = true;
+    private final boolean directoryBrowsingEnabled;
     /** Enables files in the file chooser **/
-    private boolean fileBrowsingEnabled = true;
+    private final boolean fileBrowsingEnabled;
     /** Allows setting filters on the files which are to be selected **/
     private PathnameFilter pathnameFilter;
 
@@ -89,11 +89,20 @@ public class FileChooser extends GenericDialog {
         this(title, skin, stage, baseDir, target, null);
     }
 
+
+
     public FileChooser(String title, final Skin skin, Stage stage, FileHandle baseDir, FileChooserTarget target, EventListener selectionListener) {
+        this(title, skin, stage, baseDir, target, selectionListener, true);
+    }
+    public FileChooser(String title, final Skin skin, Stage stage, FileHandle baseDir, FileChooserTarget target, EventListener selectionListener, boolean directoryBrowsingEnabled) {
         super(title, skin, stage);
         this.baseDir = baseDir;
         this.selectionListener = selectionListener;
         this.target = target;
+        // Browse files if we are picking files
+        this.fileBrowsingEnabled = target == FileChooserTarget.FILES;
+        // Browse directories
+        this.directoryBrowsingEnabled = directoryBrowsingEnabled;
 
         setCancelText(I18n.txt("gui.close"));
         setAcceptText(I18n.txt("gui.select"));
@@ -174,6 +183,7 @@ public class FileChooser extends GenericDialog {
                 final FileListItem selected = fileList.getSelected();
                 result = selected.name;
                 fileNameInput.setText(result);
+                lastClick = 0;
             }
         });
         // Double-click behaviour
@@ -181,7 +191,7 @@ public class FileChooser extends GenericDialog {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 final FileListItem selected = fileList.getSelected();
-                if (TimeUtils.millis() - lastClick < 500) {
+                if (TimeUtils.millis() - lastClick < 250) {
                     FileHandle sel = selected.file;
                     // Double click
                     if (directoryBrowsingEnabled && sel.isDirectory()) {
@@ -253,6 +263,7 @@ public class FileChooser extends GenericDialog {
 
         final FileHandle[] list = directory.list(filter);
         for (final FileHandle handle : list) {
+            // Only list hidden if user chose it
             if (showHidden || !handle.name().startsWith(".")) {
                 FileListItem fli = new FileListItem(handle);
                 items.add(fli);
@@ -275,6 +286,7 @@ public class FileChooser extends GenericDialog {
             for (FileListItem fli : l) {
                 if (fli.file.equals(lastDir)) {
                     fileList.setSelected(fli);
+                    acceptButton.setDisabled(!isTargetOk(fli.file.file()));
                     break;
                 }
             }
@@ -288,8 +300,6 @@ public class FileChooser extends GenericDialog {
 
     private boolean isTargetOk(File file) {
         switch (target) {
-        case ALL:
-            return true;
         case FILES:
             return file.isFile();
         case DIRECTORIES:
@@ -390,16 +400,6 @@ public class FileChooser extends GenericDialog {
 
     public FileChooser setResultListener(ResultListener result) {
         this.resultListener = result;
-        return this;
-    }
-
-    public FileChooser setDirectoryBrowsingEnabled(boolean directoryBrowsingEnabled) {
-        this.directoryBrowsingEnabled = directoryBrowsingEnabled;
-        return this;
-    }
-
-    public FileChooser setFileBrowsingEnabled(boolean fileBrowsingEnabled) {
-        this.fileBrowsingEnabled = fileBrowsingEnabled;
         return this;
     }
 

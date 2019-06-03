@@ -27,6 +27,7 @@ import gaia.cu9.ari.gaiaorbit.scenegraph.StubModel;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.NaturalCamera;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
 import gaia.cu9.ari.gaiaorbit.vr.VRContext;
 import gaia.cu9.ari.gaiaorbit.vr.VRContext.Space;
@@ -58,7 +59,7 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
     public final Matrix4 eyeSpace = new Matrix4();
     public final Matrix4 invEyeSpace = new Matrix4();
 
-    private ModelBatch modelBatch;
+    private IntModelBatch modelBatch;
     public Array<StubModel> controllerObjects;
     private Map<VRDevice, StubModel> vrDeviceToModel;
     private Environment controllersEnv;
@@ -72,7 +73,7 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
     private Vector3 auxf1;
     private Vector3d auxd1;
 
-    public SGROpenVR(VRContext vrContext, ModelBatch modelBatch) {
+    public SGROpenVR(VRContext vrContext, IntModelBatch modelBatch) {
         super();
         // VR Context
         this.vrContext = vrContext;
@@ -124,7 +125,7 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
         }
     }
 
-    public void renderStubModels(ModelBatch modelBatch, ICamera camera, PerspectiveCamera pc, Array<StubModel> controllerObjects, int eye) {
+    public void renderStubModels(IntModelBatch modelBatch, ICamera camera, PerspectiveCamera pc, Array<StubModel> controllerObjects, int eye) {
         updateCamera(camera != null ? (NaturalCamera) camera.getCurrent() : null, pc, eye, false, rc, 0.1f);
         Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
         modelBatch.begin(pc);

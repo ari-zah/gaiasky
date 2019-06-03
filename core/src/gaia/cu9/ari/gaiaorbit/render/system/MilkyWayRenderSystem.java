@@ -7,10 +7,12 @@ package gaia.cu9.ari.gaiaorbit.render.system;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
@@ -25,6 +27,8 @@ import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
 import gaia.cu9.ari.gaiaorbit.util.Constants;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf.ProgramConf.StereoProfile;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
 
 import java.util.Random;
@@ -39,9 +43,9 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
     private MeshData quad;
     private Texture[] nebulatextures;
 
-    private ModelBatch modelBatch;
+    private IntModelBatch modelBatch;
 
-    public MilkyWayRenderSystem(RenderGroup rg, float[] alphas, ModelBatch modelBatch, ShaderProgram[] pointShaders, ShaderProgram[] nebulaShaders) {
+    public MilkyWayRenderSystem(RenderGroup rg, float[] alphas, IntModelBatch modelBatch, ShaderProgram[] pointShaders, ShaderProgram[] nebulaShaders) {
         super(rg, alphas, pointShaders);
         this.nebulaShaders = nebulaShaders;
         this.modelBatch = modelBatch;
@@ -76,7 +80,7 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
         int nVertices = 3000000;
 
         VertexAttribute[] attribs = buildVertexAttributes();
-        curr.mesh = new Mesh(false, nVertices, 0, attribs);
+        curr.mesh = new IntMesh(false, nVertices, 0, attribs);
 
         curr.vertexSize = curr.mesh.getVertexAttributes().vertexSize / 4;
         curr.colorOffset = curr.mesh.getVertexAttribute(Usage.ColorPacked) != null ? curr.mesh.getVertexAttribute(Usage.ColorPacked).offset / 4 : 0;
@@ -91,10 +95,10 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
         int maxQuadIndices = maxQuads * 6;
         quad = new MeshData();
 
-        quad.mesh = new Mesh(false, maxQuadVertices, maxQuadIndices, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), new VertexAttribute(Usage.Generic, 2, "a_additional"));
+        quad.mesh = new IntMesh(false, maxQuadVertices, maxQuadIndices, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0), new VertexAttribute(Usage.Generic, 2, "a_additional"));
         quad.vertices = new float[maxQuadVertices * (quad.mesh.getVertexAttributes().vertexSize / 4)];
         quad.vertexSize = quad.mesh.getVertexAttributes().vertexSize / 4;
-        quad.indices = new short[maxQuadIndices];
+        quad.indices = new int[maxQuadIndices];
     }
 
     private ShaderProgram getNebulaProgram() {
@@ -261,11 +265,11 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
 
                         // Indices
                         quad.indices[quad.indexIdx] = quad.indexVert;
-                        quad.indices[quad.indexIdx + 1] = (short) (quad.indexVert + 1);
-                        quad.indices[quad.indexIdx + 2] = (short) (quad.indexVert + 2);
-                        quad.indices[quad.indexIdx + 3] = (short) (quad.indexVert + 2);
-                        quad.indices[quad.indexIdx + 4] = (short) (quad.indexVert + 3);
-                        quad.indices[quad.indexIdx + 5] = (short) (quad.indexVert + 0);
+                        quad.indices[quad.indexIdx + 1] = quad.indexVert + 1;
+                        quad.indices[quad.indexIdx + 2] = quad.indexVert + 2;
+                        quad.indices[quad.indexIdx + 3] = quad.indexVert + 2;
+                        quad.indices[quad.indexIdx + 4] = quad.indexVert + 3;
+                        quad.indices[quad.indexIdx + 5] = quad.indexVert + 0;
                         quad.indexIdx += 6;
                         quad.indexVert += 4;
 

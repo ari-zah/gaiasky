@@ -8,7 +8,7 @@ There are several ways to contribute to the Gaia Sky project:
 
 ### Pull requests and source code
 
-Start by checking the official docs ([here](http://gaia-sky.readthedocs.io])) to get acquainted with the project. It may also help decide what part you want to contribute to. Pull requests should be accompanied with extensive and comprehensive comments. In case that changes in the documentations are needed, they should be also part of the pull request (folder [/docs](docs)).
+Start by checking the official docs ([here](http://gaia-sky.readthedocs.io)) to get acquainted with the project. It may also help decide what part you want to contribute to. Pull requests should be accompanied with extensive and comprehensive comments. In case that changes in the documentations are needed, they should be also part of the pull request (folder [/docs](docs)).
 
 Pull requests should never contain configuration files unless totally necessary (do not commit your `conf/global.properties`). Also, make sure that the project compiles and all the dependencies are well specified in the `build.gradle`. 
 

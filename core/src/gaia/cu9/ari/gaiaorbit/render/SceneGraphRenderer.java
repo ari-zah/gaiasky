@@ -14,9 +14,6 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.utils.RenderableSorter;
-import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
@@ -47,13 +44,16 @@ import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.GlobalResources;
 import gaia.cu9.ari.gaiaorbit.util.Logger;
 import gaia.cu9.ari.gaiaorbit.util.Logger.Log;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntModelBatch;
+import gaia.cu9.ari.gaiaorbit.util.gdx.IntRenderableSorter;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.AtmosphereShaderProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.GroundShaderProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.RelativisticShaderProvider;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.ShaderProgramProvider.ShaderProgramParameter;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.provider.IntShaderProvider;
 import gaia.cu9.ari.gaiaorbit.util.gravwaves.RelativisticEffectsManager;
 import gaia.cu9.ari.gaiaorbit.util.math.MathUtilsd;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
-import gaia.cu9.ari.gaiaorbit.util.override.AtmosphereShaderProvider;
-import gaia.cu9.ari.gaiaorbit.util.override.GroundShaderProvider;
-import gaia.cu9.ari.gaiaorbit.util.override.RelativisticShaderProvider;
-import gaia.cu9.ari.gaiaorbit.util.override.ShaderProgramProvider.ShaderProgramParameter;
 import gaia.cu9.ari.gaiaorbit.vr.VRContext;
 
 import java.nio.IntBuffer;
@@ -68,6 +68,12 @@ import java.util.Map;
  */
 public class SceneGraphRenderer extends AbstractRenderer implements IProcessRenderer, IObserver {
     private static final Log logger = Logger.getLogger(SceneGraphRenderer.class);
+    public static SceneGraphRenderer instance;
+
+    public static void initialise(AssetManager manager, VRContext vrContext) {
+        instance = new SceneGraphRenderer(vrContext);
+        instance.initialize(manager);
+    }
 
     /** Contains the flags representing each type's visibility **/
     public static ComponentTypes visible;
@@ -105,12 +111,12 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
     private Matrix4[] shadowMapCombined;
     public Map<ModelBody, Texture> smTexMap;
     public Map<ModelBody, Matrix4> smCombinedMap;
-    private ModelBatch modelBatchDepth;
+    private IntModelBatch modelBatchDepth;
 
     // Light glow pre-render
     private FrameBuffer glowFb;
     private Texture glowTex;
-    private ModelBatch modelBatchOpaque;
+    private IntModelBatch modelBatchOpaque;
 
     private Vector3 aux1;
     private Vector3d aux1d;
@@ -138,7 +144,7 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
             spp.vertexFile = vfile;
             spp.fragmentFile = ffile;
             manager.load(names[i], ShaderProgram.class, spp);
-            AssetDescriptor<ShaderProgram> desc = new AssetDescriptor<ShaderProgram>(names[i], ShaderProgram.class, spp);
+            AssetDescriptor<ShaderProgram> desc = new AssetDescriptor<>(names[i], ShaderProgram.class, spp);
             result[i] = desc;
 
             i++;
@@ -339,33 +345,33 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
             render_lists.add(new Array<>(40000));
         }
 
-        ShaderProvider sp = manager.get("atmgrounddefault");
-        ShaderProvider spadditive = manager.get("additive");
-        ShaderProvider spgrids = manager.get("grids");
-        ShaderProvider spnormal = manager.get("atmground");
-        ShaderProvider spatm = manager.get("atm");
-        ShaderProvider spcloud = manager.get("cloud");
-        ShaderProvider spsurface = manager.get("spsurface");
-        ShaderProvider spbeam = manager.get("spbeam");
-        ShaderProvider spdepth = manager.get("spdepth");
-        ShaderProvider spopaque = manager.get("spopaque");
+        IntShaderProvider sp = manager.get("atmgrounddefault");
+        IntShaderProvider spadditive = manager.get("additive");
+        IntShaderProvider spgrids = manager.get("grids");
+        IntShaderProvider spnormal = manager.get("atmground");
+        IntShaderProvider spatm = manager.get("atm");
+        IntShaderProvider spcloud = manager.get("cloud");
+        IntShaderProvider spsurface = manager.get("spsurface");
+        IntShaderProvider spbeam = manager.get("spbeam");
+        IntShaderProvider spdepth = manager.get("spdepth");
+        IntShaderProvider spopaque = manager.get("spopaque");
 
-        RenderableSorter noSorter = (camera, renderables) -> {
+        IntRenderableSorter noSorter = (camera, renderables) -> {
             // Does nothing
         };
 
-        ModelBatch modelBatchDefault = new ModelBatch(sp, noSorter);
-        ModelBatch modelBatchMesh = new ModelBatch(spadditive, noSorter);
+        IntModelBatch modelBatchDefault = new IntModelBatch(sp, noSorter);
+        IntModelBatch modelBatchMesh = new IntModelBatch(spadditive, noSorter);
         modelBatchMesh.getRenderContext().setBlending(true, GL30.GL_ONE, GL30.GL_ONE);
-        //modelBatchMesh.getRenderContext().setDepthTest(GL30.GL_LEQUAL, 1e11f, 1e13f);
-        ModelBatch modelBatchGrids = new ModelBatch(spgrids, noSorter);
-        ModelBatch modelBatchNormal = new ModelBatch(spnormal, noSorter);
-        ModelBatch modelBatchAtmosphere = new ModelBatch(spatm, noSorter);
-        ModelBatch modelBatchCloud = new ModelBatch(spcloud, noSorter);
-        ModelBatch modelBatchStar = new ModelBatch(spsurface, noSorter);
-        ModelBatch modelBatchBeam = new ModelBatch(spbeam, noSorter);
-        modelBatchDepth = new ModelBatch(spdepth, noSorter);
-        modelBatchOpaque = new ModelBatch(spopaque, noSorter);
+        modelBatchMesh.getRenderContext().setDepthTest(GL30.GL_LEQUAL, 1e11f, 1e13f);
+        IntModelBatch modelBatchGrids = new IntModelBatch(spgrids, noSorter);
+        IntModelBatch modelBatchNormal = new IntModelBatch(spnormal, noSorter);
+        IntModelBatch modelBatchAtmosphere = new IntModelBatch(spatm, noSorter);
+        IntModelBatch modelBatchCloud = new IntModelBatch(spcloud, noSorter);
+        IntModelBatch modelBatchStar = new IntModelBatch(spsurface, noSorter);
+        IntModelBatch modelBatchBeam = new IntModelBatch(spbeam, noSorter);
+        modelBatchDepth = new IntModelBatch(spdepth, noSorter);
+        modelBatchOpaque = new IntModelBatch(spopaque, noSorter);
 
         // Fonts - all of these are distance field fonts
         BitmapFont font3d = manager.get("font/main-font.fnt");
@@ -996,23 +1002,25 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
         switch (event) {
         case TOGGLE_VISIBILITY_CMD:
             ComponentType ct = ComponentType.getFromKey((String) data[0]);
-            int idx = ct.ordinal();
-            if (data.length == 3) {
-                // We have the boolean
-                boolean currvis = visible.get(ct.ordinal());
-                boolean newvis = (boolean) data[2];
-                if (currvis != newvis) {
-                    // Only update if visibility different
-                    if (newvis)
-                        visible.set(ct.ordinal());
-                    else
-                        visible.clear(ct.ordinal());
+            if (ct != null) {
+                int idx = ct.ordinal();
+                if (data.length == 3) {
+                    // We have the boolean
+                    boolean currvis = visible.get(ct.ordinal());
+                    boolean newvis = (boolean) data[2];
+                    if (currvis != newvis) {
+                        // Only update if visibility different
+                        if (newvis)
+                            visible.set(ct.ordinal());
+                        else
+                            visible.clear(ct.ordinal());
+                        times[idx] = (long) (GaiaSky.instance.getT() * 1000f);
+                    }
+                } else {
+                    // Only toggle
+                    visible.flip(ct.ordinal());
                     times[idx] = (long) (GaiaSky.instance.getT() * 1000f);
                 }
-            } else {
-                // Only toggle
-                visible.flip(ct.ordinal());
-                times[idx] = (long) (GaiaSky.instance.getT() * 1000f);
             }
             break;
 

@@ -8,18 +8,19 @@ package gaia.cu9.ari.gaiaorbit.render.system;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import gaia.cu9.ari.gaiaorbit.render.ComponentTypes;
 import gaia.cu9.ari.gaiaorbit.render.ILineRenderable;
 import gaia.cu9.ari.gaiaorbit.render.IRenderable;
+import gaia.cu9.ari.gaiaorbit.render.SceneGraphRenderer;
 import gaia.cu9.ari.gaiaorbit.scenegraph.Particle;
 import gaia.cu9.ari.gaiaorbit.scenegraph.SceneGraphNode.RenderGroup;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
-import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
+import gaia.cu9.ari.gaiaorbit.util.gdx.mesh.IntMesh;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Comparator;
@@ -58,7 +59,7 @@ public class LineRenderSystem extends ImmediateRenderSystem {
             curr.capacity = 10000;
 
             VertexAttribute[] attribs = buildVertexAttributes();
-            curr.mesh = new Mesh(false, curr.capacity, 0, attribs);
+            curr.mesh = new IntMesh(false, curr.capacity, 0, attribs);
 
             curr.vertexSize = curr.mesh.getVertexAttributes().vertexSize / 4;
             curr.vertices = new float[curr.capacity * curr.vertexSize];
@@ -104,13 +105,13 @@ public class LineRenderSystem extends ImmediateRenderSystem {
             ILineRenderable renderable = (ILineRenderable) renderables.get(i);
             boolean rend = true;
             // TODO ugly hack
-            if (renderable instanceof Particle && !GlobalConf.scene.PROPER_MOTION_VECTORS)
+            if (renderable instanceof Particle && !SceneGraphRenderer.instance.isOn(ComponentTypes.ComponentType.VelocityVectors))
                 rend = false;
             if (rend) {
                 renderable.render(this, camera, getAlpha(renderable));
             }
 
-            Gdx.gl.glLineWidth(renderable.getLineWidth() * GlobalConf.SCALE_FACTOR);
+            Gdx.gl.glLineWidth(renderable.getLineWidth() * 2.0f);
 
             for (int md = 0; md < meshIdx; md++) {
                 MeshData meshd = meshes.get(md);
@@ -135,6 +136,12 @@ public class LineRenderSystem extends ImmediateRenderSystem {
     }
 
     public void addPoint(ILineRenderable lr, double x, double y, double z, float r, float g, float b, float a) {
+        // Check if 3 more indices fit
+        if (curr.numVertices + 1 >= curr.capacity) {
+            // Create new mesh data
+            initVertices(meshIdx++);
+        }
+
         color(r, g, b, a);
         vertex((float) x, (float) y, (float) z);
     }

@@ -12,8 +12,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Matrix4;
@@ -21,8 +19,10 @@ import com.badlogic.gdx.math.Vector3;
 import gaia.cu9.ari.gaiaorbit.data.AssetBean;
 import gaia.cu9.ari.gaiaorbit.util.*;
 import gaia.cu9.ari.gaiaorbit.util.Logger.Log;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModel;
+import gaia.cu9.ari.gaiaorbit.util.gdx.model.IntModelInstance;
+import gaia.cu9.ari.gaiaorbit.util.gdx.shader.AtmosphereAttribute;
 import gaia.cu9.ari.gaiaorbit.util.math.Vector3d;
-import gaia.cu9.ari.gaiaorbit.util.override.AtmosphereAttribute;
 
 import java.util.Map;
 
@@ -93,13 +93,13 @@ public class CloudComponent {
 
     public void doneLoading(AssetManager manager) {
         this.manager = manager;
-        Pair<Model, Map<String, Material>> pair = ModelCache.cache.getModel("sphere", params, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
-        Model cloudModel = pair.getFirst();
+        Pair<IntModel, Map<String, Material>> pair = ModelCache.cache.getModel("sphere", params, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
+        IntModel cloudModel = pair.getFirst();
         Material material = pair.getSecond().get("base");
         material.clear();
 
         // CREATE CLOUD MODEL
-        mc.instance = new ModelInstance(cloudModel, this.localTransform);
+        mc.instance = new IntModelInstance(cloudModel, this.localTransform);
 
         if (!GlobalConf.scene.LAZY_TEXTURE_INIT)
             initMaterial();

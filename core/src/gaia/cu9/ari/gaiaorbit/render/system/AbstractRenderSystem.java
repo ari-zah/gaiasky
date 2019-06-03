@@ -8,11 +8,11 @@ package gaia.cu9.ari.gaiaorbit.render.system;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import gaia.cu9.ari.gaiaorbit.render.ComponentTypes;
 import gaia.cu9.ari.gaiaorbit.render.IRenderable;
 import gaia.cu9.ari.gaiaorbit.render.RenderingContext;
 import gaia.cu9.ari.gaiaorbit.scenegraph.SceneGraphNode.RenderGroup;
 import gaia.cu9.ari.gaiaorbit.scenegraph.camera.ICamera;
-import gaia.cu9.ari.gaiaorbit.render.ComponentTypes;
 import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.gravwaves.RelativisticEffectsManager;
 
@@ -109,7 +109,7 @@ public abstract class AbstractRenderSystem implements IRenderSystem {
     }
 
     public interface RenderSystemRunnable {
-        public abstract void run(AbstractRenderSystem renderSystem, Array<IRenderable> renderables, ICamera camera);
+        void run(AbstractRenderSystem renderSystem, Array<IRenderable> renderables, ICamera camera);
     }
 
     protected void addEffectsUniforms(ShaderProgram shaderProgram, ICamera camera) {

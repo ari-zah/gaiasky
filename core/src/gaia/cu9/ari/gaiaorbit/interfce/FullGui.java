@@ -87,7 +87,7 @@ public class FullGui extends AbstractGui {
         logger.info(I18n.txt("notif.gui.init"));
 
         skin = GlobalResources.skin;
-        interfaces = new Array<IGuiInterface>();
+        interfaces = new Array<>();
 
         buildGui();
 
@@ -110,7 +110,7 @@ public class FullGui extends AbstractGui {
         focusInterface = new FocusInfoInterface(skin);
         // focusInterface.setFillParent(true);
         focusInterface.left().top();
-        fi = new Container<FocusInfoInterface>(focusInterface);
+        fi = new Container<>(focusInterface);
         fi.setFillParent(true);
         fi.bottom().right();
         fi.pad(0, 0, 10, 10);
@@ -153,7 +153,7 @@ public class FullGui extends AbstractGui {
         rebuildGui();
 
         // INVISIBLE IN STEREOSCOPIC MODE
-        invisibleInStereoMode = new ArrayList<Actor>();
+        invisibleInStereoMode = new ArrayList<>();
         invisibleInStereoMode.add(controlsWindow);
         invisibleInStereoMode.add(fi);
         invisibleInStereoMode.add(messagesInterface);
@@ -172,11 +172,13 @@ public class FullGui extends AbstractGui {
                     if (!vce.isFailed()) {
                         // Check version
                         String tagVersion = vce.getTag();
+                        Integer versionNumber = vce.getVersionNumber();
                         Instant tagDate = vce.getTagTime();
 
                         GlobalConf.program.VERSION_LAST_TIME = Instant.now();
 
-                        if (tagDate.isAfter(GlobalConf.version.buildtime)) {
+                        if (versionNumber > GlobalConf.version.versionNumber) {
+                            logger.info(I18n.txt("gui.newversion.available", GlobalConf.version.version, tagVersion));
                             // There's a new version!
                             UpdatePopup newVersion = new UpdatePopup(tagVersion, ui, skin);
                             newVersion.pack();
@@ -320,11 +322,11 @@ public class FullGui extends AbstractGui {
             break;
         case SHOW_SEARCH_ACTION:
             if (searchDialog == null) {
-                searchDialog = new SearchDialog(this, skin, sg);
+                searchDialog = new SearchDialog(skin, ui, sg);
             } else {
                 searchDialog.clearText();
             }
-            searchDialog.display();
+            searchDialog.show(ui);
             break;
         case SHOW_LAND_AT_LOCATION_ACTION:
             CelestialBody target = (CelestialBody) data[0];

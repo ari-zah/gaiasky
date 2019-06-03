@@ -389,6 +389,9 @@
     "tooltip": {
       "imageUp": "tooltip-icon"
     },
+    "question": {
+      "imageUp": "question-mark"
+    },
     "audio-playpause": {
       "imageUp": "audio-play",
       "imageChecked": "audio-pause"
@@ -547,9 +550,13 @@
       "font": "ui-13",
       "fontColor": "red"
     },
+    "question": {
+      "font": "ui-09",
+      "fontColor": "red"
+    },
     "default": {
       "font": "ui-11",
-      "fontColor": "white"
+      "fontColor": "red"
     },
     "default-blue": {
       "font": "ui-11",

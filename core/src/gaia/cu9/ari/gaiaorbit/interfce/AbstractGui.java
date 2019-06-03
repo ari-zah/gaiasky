@@ -90,12 +90,7 @@ public abstract class AbstractGui implements IObserver, IGui {
 
     @Override
     public void resize(final int width, final int height) {
-        Gdx.app.postRunnable(new Runnable() {
-            @Override
-            public void run() {
-                resizeImmediate(width, height);
-            }
-        });
+        Gdx.app.postRunnable(() -> resizeImmediate(width, height));
     }
 
     @Override
