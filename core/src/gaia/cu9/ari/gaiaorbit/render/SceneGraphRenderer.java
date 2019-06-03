@@ -357,7 +357,7 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
         ModelBatch modelBatchDefault = new ModelBatch(sp, noSorter);
         ModelBatch modelBatchMesh = new ModelBatch(spadditive, noSorter);
         modelBatchMesh.getRenderContext().setBlending(true, GL30.GL_ONE, GL30.GL_ONE);
-        modelBatchMesh.getRenderContext().setDepthTest(GL30.GL_LEQUAL, 1e11f, 1e13f);
+        //modelBatchMesh.getRenderContext().setDepthTest(GL30.GL_LEQUAL, 1e11f, 1e13f);
         ModelBatch modelBatchGrids = new ModelBatch(spgrids, noSorter);
         ModelBatch modelBatchNormal = new ModelBatch(spnormal, noSorter);
         ModelBatch modelBatchAtmosphere = new ModelBatch(spatm, noSorter);

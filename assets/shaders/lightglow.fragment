@@ -58,7 +58,7 @@ void main()
 	 	 float viewAngle = min(0.0001, u_lightViewAngles[li]);
 	 	 vec3 lightColor = u_lightColors[li];
 	 	 // Size of sampling spiral
-		 float a = u_textureScale * viewAngle * 5.0;
+		 float a = u_textureScale * viewAngle * 0.1;
 		 
 		 // Archimedes' spiral (fx = a*t*cos(t), fy = a*t*sin(t)) sampling from 0 to 3*Pi (extends to a radius of roughly 10)
 		 float t = 0;

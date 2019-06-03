@@ -118,19 +118,19 @@ public class DesktopPostProcessor implements IPostProcessor, IObserver {
         Texture glow;
         // TODO Listen to GRAPHICS_QUALITY_CHANGED and apply new settings on the fly
         if (GlobalConf.scene.isHighQuality()) {
-            lglowNSamples = 12;
-            lgw = 1280;
+            lglowNSamples = 1;
+            lgw = 2200;
             lgh = Math.round(lgw / ar);
             glow = manager.get(GlobalConf.data.dataFile("tex/base/star_glow.png"));
             Glow.N = 30;
         } else if (GlobalConf.scene.isNormalQuality()) {
-            lglowNSamples = 8;
-            lgw = 1000;
+            lglowNSamples = 1;
+            lgw = 1280;
             lgh = Math.round(lgw / ar);
             glow = manager.get(GlobalConf.data.dataFile("tex/base/star_glow_s.png"));
             Glow.N = 20;
         } else {
-            lglowNSamples = 4;
+            lglowNSamples = 1;
             lgw = 1000;
             lgh = Math.round(lgw / ar);
             glow = manager.get(GlobalConf.data.dataFile("tex/base/star_glow_s.png"));
