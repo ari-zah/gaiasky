@@ -336,7 +336,7 @@ public class GlobalConf {
         public boolean RELATIVISTIC_ABERRATION = false;
         public boolean GRAVITATIONAL_WAVES = false;
 
-        public boolean DISPLAY_VR_GUI = false;
+        public boolean DISPLAY_VR_GUI = true;
 
         public RuntimeConf() {
             EventManager.instance.subscribe(this, Events.LIMIT_MAG_CMD, Events.INPUT_ENABLED_CMD, Events.DISPLAY_GUI_CMD, Events.TOGGLE_UPDATEPAUSE, Events.TOGGLE_TIME_CMD, Events.RECORD_CAMERA_CMD, Events.GRAV_WAVE_START, Events.GRAV_WAVE_STOP, Events.DISPLAY_VR_GUI_CMD);

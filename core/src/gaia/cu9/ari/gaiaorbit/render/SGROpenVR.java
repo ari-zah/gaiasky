@@ -39,17 +39,20 @@ import java.util.Map;
 /**
  * Renders to OpenVR. Renders basically two scenes, one for each eye, using the
  * OpenVR context.
- * 
- * @author tsagrista
  *
+ * @author tsagrista
  */
 public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
 
     private VRContext vrContext;
 
-    /** Frame buffers for each eye **/
+    /**
+     * Frame buffers for each eye
+     **/
     FrameBuffer fbLeft, fbRight;
-    /** Textures **/
+    /**
+     * Textures
+     **/
     Texture texLeft, texRight;
 
     HmdMatrix44 projectionMat = HmdMatrix44.create();
@@ -66,8 +69,8 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
     private SpriteBatch sb;
 
     // Focus info
-    private VRGui infoGui;
-    private VRGui controllerHintGui;
+    private VRGui<VRInfoGui> infoGui;
+    private VRGui<VRControllerInfoGui> controllerHintGui;
 
     private Vector3 auxf1;
     private Vector3d auxd1;
@@ -101,10 +104,10 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
 
             // Env
             controllersEnv = new Environment();
-            controllersEnv.set(new ColorAttribute(ColorAttribute.AmbientLight, .5f, .1f, .1f, 1f));
+            controllersEnv.set(new ColorAttribute(ColorAttribute.AmbientLight, .2f, .2f, .2f, 1f));
             DirectionalLight dlight = new DirectionalLight();
-            dlight.color.set(1f, 0f, 0f, 1f);
-            dlight.direction.set(0, 1, 0);
+            dlight.color.set(1f, 1f, 1f, 1f);
+            dlight.direction.set(0, -1, 0);
             controllersEnv.add(dlight);
 
             // Controller objects
@@ -114,10 +117,10 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
                 addVRController(controller);
             }
 
-            infoGui = new VRGui(VRInfoGui.class, 100);
+            infoGui = new VRGui(VRInfoGui.class, (int) (GlobalConf.screen.SCREEN_WIDTH / 10f));
             infoGui.initialize(null);
 
-            controllerHintGui = new VRGui(VRControllerInfoGui.class, -100);
+            controllerHintGui = new VRGui(VRControllerInfoGui.class, (int) (-GlobalConf.screen.SCREEN_WIDTH / 10f));
             controllerHintGui.initialize(null);
 
             EventManager.instance.subscribe(this, Events.FRAME_SIZE_UDPATE, Events.SCREENSHOT_SIZE_UDPATE, Events.VR_DEVICE_CONNECTED, Events.VR_DEVICE_DISCONNECTED);
@@ -175,9 +178,12 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
             // Camera
             camera.render(1496, 1780);
 
-            if (GlobalConf.runtime.DISPLAY_VR_GUI)
+            // GUI
+            if (controllerHintGui.left().isVisible()) {
+                renderGui(controllerHintGui.left());
+            } else if (GlobalConf.runtime.DISPLAY_VR_GUI) {
                 renderGui(infoGui.left());
-            renderGui(controllerHintGui.left());
+            }
 
             if (r) {
                 renderStubModels(modelBatch, camera, camera.getCamera(), controllerObjects, 0);
@@ -199,9 +205,12 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
             // Camera
             camera.render(1496, 1780);
 
-            if (GlobalConf.runtime.DISPLAY_VR_GUI)
+            // GUI
+            if (controllerHintGui.right().isVisible()) {
+                renderGui(controllerHintGui.right());
+            } else if (GlobalConf.runtime.DISPLAY_VR_GUI) {
                 renderGui(infoGui.right());
-            renderGui(controllerHintGui.right());
+            }
 
             if (r) {
                 renderStubModels(modelBatch, camera, camera.getCamera(), controllerObjects, 1);
@@ -299,24 +308,24 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
     @Override
     public void notify(Events event, Object... data) {
         switch (event) {
-        case VR_DEVICE_CONNECTED:
-            VRDevice device = (VRDevice) data[0];
-            if (device.getType() == VRDeviceType.Controller) {
-                Gdx.app.postRunnable(() -> {
-                    addVRController(device);
-                });
-            }
-            break;
-        case VR_DEVICE_DISCONNECTED:
-            device = (VRDevice) data[0];
-            if (device.getType() == VRDeviceType.Controller) {
-                Gdx.app.postRunnable(() -> {
-                    removeVRController(device);
-                });
-            }
-            break;
-        default:
-            break;
+            case VR_DEVICE_CONNECTED:
+                VRDevice device = (VRDevice) data[0];
+                if (device.getType() == VRDeviceType.Controller) {
+                    Gdx.app.postRunnable(() -> {
+                        addVRController(device);
+                    });
+                }
+                break;
+            case VR_DEVICE_DISCONNECTED:
+                device = (VRDevice) data[0];
+                if (device.getType() == VRDeviceType.Controller) {
+                    Gdx.app.postRunnable(() -> {
+                        removeVRController(device);
+                    });
+                }
+                break;
+            default:
+                break;
         }
 
     }

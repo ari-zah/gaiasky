@@ -7,18 +7,18 @@ import gaia.cu9.ari.gaiaorbit.render.ComponentTypes;
 import gaia.cu9.ari.gaiaorbit.scenegraph.ISceneGraph;
 import gaia.cu9.ari.gaiaorbit.util.Logger;
 
-public class VRGui implements IGui {
+public class VRGui<T extends IGui> implements IGui {
 
-    private IGui right;
-    private IGui left;
+    private T right;
+    private T left;
 
-    public VRGui(Class<? extends IGui> clazz, int hoffset) {
+    public VRGui(Class<T> clazz, int hoffset) {
         super();
         try {
-            right = clazz.newInstance();
+            right = clazz.getDeclaredConstructor().newInstance();
             right.setHoffset(-hoffset);
 
-            left = clazz.newInstance();
+            left = clazz.getDeclaredConstructor().newInstance();
             left.setHoffset(hoffset);
         } catch (Exception e) {
             Logger.getLogger(this.getClass()).error(e);
@@ -50,11 +50,11 @@ public class VRGui implements IGui {
         left.update(dt);
     }
 
-    public IGui right() {
+    public T right() {
         return right;
     }
 
-    public IGui left() {
+    public T left() {
         return left;
     }
 

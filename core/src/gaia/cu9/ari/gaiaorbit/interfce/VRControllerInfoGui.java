@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import gaia.cu9.ari.gaiaorbit.event.EventManager;
 import gaia.cu9.ari.gaiaorbit.event.Events;
+import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.GlobalResources;
 
 public class VRControllerInfoGui extends AbstractGui {
@@ -28,19 +29,25 @@ public class VRControllerInfoGui extends AbstractGui {
         ui = new Stage(new ScreenViewport(), GlobalResources.spriteBatch);
         skin = GlobalResources.skin;
 
-        container = new Container<Table>();
+        float h = GlobalConf.screen.SCREEN_HEIGHT;
+        float w = GlobalConf.screen.SCREEN_WIDTH;
+        container = new Container<>();
         container.setFillParent(true);
         container.bottom().left();
-        container.padLeft(200 - hoffset);
-        container.padBottom(400);
 
         contents = new Table();
-        Texture vrctrl_tex = new Texture(Gdx.files.internal("img/controller/controller-info.png"));
+        Texture vrctrl_tex = new Texture(Gdx.files.internal("img/controller/hud-info-ui.png"));
         vrctrl_tex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         Image vrctrl = new Image(vrctrl_tex);
-        vrctrl.setScale(0.3f);
+        float texScale = 0.7f;
+        vrctrl.setScale(texScale);
         contents.addActor(vrctrl);
 
+        float tw = vrctrl_tex.getWidth() * texScale;
+        float th = vrctrl_tex.getHeight() * texScale;
+
+        container.padLeft((w - tw) / 2f - hoffset);
+        container.padBottom((h - th) / 2f);
         container.setActor(contents);
         contents.setVisible(false);
 
@@ -68,15 +75,19 @@ public class VRControllerInfoGui extends AbstractGui {
         }
     }
 
+    public boolean isVisible(){
+        return contents != null && contents.isVisible();
+    }
+
     @Override
     public void notify(Events event, Object... data) {
 
         switch (event) {
-        case DISPLAY_VR_CONTROLLER_HINT_CMD:
-            contents.setVisible((Boolean) data[0]);
-            break;
-        default:
-            break;
+            case DISPLAY_VR_CONTROLLER_HINT_CMD:
+                contents.setVisible((Boolean) data[0]);
+                break;
+            default:
+                break;
         }
     }
 }

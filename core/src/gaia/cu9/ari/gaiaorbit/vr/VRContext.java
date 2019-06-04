@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Matrix4;
@@ -594,7 +595,7 @@ public class VRContext implements Disposable {
             return models.get(name);
 
         // FIXME we load the models synchronously cause we are lazy
-        int error = 0;
+        int error;
         PointerBuffer modelPointer = PointerBuffer.allocateDirect(1);
         while (true) {
             error = VRRenderModels.VRRenderModels_LoadRenderModel_Async(name, modelPointer);
@@ -606,7 +607,6 @@ public class VRContext implements Disposable {
             return null;
         RenderModel renderModel = new RenderModel(modelPointer.getByteBuffer(RenderModel.SIZEOF));
 
-        error = 0;
         PointerBuffer texturePointer = PointerBuffer.allocateDirect(1);
         while (true) {
             error = VRRenderModels.VRRenderModels_LoadTexture_Async(renderModel.diffuseTextureId(), texturePointer);

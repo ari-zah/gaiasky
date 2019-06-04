@@ -357,7 +357,7 @@ public class GaiaSky implements ApplicationListener, IObserver, IMainRenderer {
                 logger.info("HMD device is not null: " + vrContext.getDeviceByType(VRDeviceType.HeadMountedDisplay).toString());
             }
 
-            vrDeviceToModel = new HashMap<VRDevice, StubModel>();
+            vrDeviceToModel = new HashMap<>();
 
             GlobalConf.runtime.OPENVR = true;
             if (false && GlobalConf.screen.SCREEN_WIDTH != vrContext.getWidth()) {

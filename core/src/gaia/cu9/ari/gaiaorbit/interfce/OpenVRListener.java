@@ -132,6 +132,8 @@ public class OpenVRListener implements VRDeviceListener {
             } else if (button == VRControllerButtons.B) {
                 vrInfoGui = !vrInfoGui;
                 EventManager.instance.post(Events.DISPLAY_VR_GUI_CMD, vrInfoGui);
+            } else if (button == VRControllerButtons.A) {
+                EventManager.instance.post(Events.TOGGLE_VISIBILITY_CMD, "element.labels", false);
             } else if (button == VRControllerButtons.SteamVR_Touchpad) {
                 // Change mode from free to focus and viceversa
                 CameraMode cm = cam.getMode().equals(CameraMode.Focus) ? CameraMode.Free_Camera : CameraMode.Focus;
