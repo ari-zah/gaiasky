@@ -147,9 +147,9 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
                     // SIZE
                     double starSize;
                     if (star.data.length > 3) {
-                        starSize = (star.data[3] * 14f + 4.0f);
+                        starSize = (star.data[3] * 10f + 2.0f);
                     } else {
-                        starSize = (float) Math.abs(rand.nextGaussian()) * 14f + 4.0f;
+                        starSize = (float) Math.abs(rand.nextGaussian()) * 10f + 2.0f;
                     }
                     curr.vertices[curr.vertexIdx + additionalOffset] = (float) (starSize * density * 2);
                     curr.vertices[curr.vertexIdx + additionalOffset + 1] = 0.7f;
@@ -190,7 +190,7 @@ public class MilkyWayRenderSystem extends ImmediateRenderSystem implements IObse
                         } else {
                             texnum = rand.nextInt(4);
                         }
-                        quadsize = (float) ((qp.data.length > 3 ? (qp.data[3] + 0.7f) : (rand.nextFloat() + 1.0f)) * .75e11* Constants.VR_SCALE);
+                        quadsize = (float) ((qp.data.length > 3 ? (qp.data[3] + 0.7f) : (rand.nextFloat() + 1.0f)) * .6e11* Constants.VR_SCALE);
                         alphamultiplier = MathUtilsd.lint(quadpointdist, 0, mw.size * 3, 6.0f, 1.0f);
 
                         rotaxis.set(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());

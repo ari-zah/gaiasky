@@ -361,5 +361,8 @@ public class Star extends Particle {
             map.remove(tycho);
         }
     }
+    public float getFuzzyRenderSize(ICamera camera) {
+        return super.getFuzzyRenderSize(camera) * 5f;
+    }
 
 }

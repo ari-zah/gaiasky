@@ -10,7 +10,7 @@ SETLOCAL ENABLEEXTENSIONS
 SET GSDIR=%~dp0
 
 :: Memory
-SET OPTS=-Xms2g -Xmx4g
+SET OPTS=-Xms2g -Xmx8g
 :: Garbage Collector G1
 SET OPTS=%OPTS% -XX:+UseG1GC
 :: Assets location
@@ -34,5 +34,5 @@ IF EXIST %GSDIR%jre\bin\java.exe (
 )
 @ECHO ON
 :: Run
-"%JAVA_CMD%" %OPTS% -cp "%GSDIR%lib\*" gaia.cu9.ari.gaiaorbit.desktop.GaiaSkyDesktop
+"%JAVA_CMD%" %OPTS% -cp "%GSDIR%lib\*" gaia.cu9.ari.gaiaorbit.desktop.GaiaSkyDesktop %1 %2 %3
 :END
