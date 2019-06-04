@@ -1,6 +1,8 @@
 apply plugin: "java"
 apply plugin: "com.install4j.gradle"
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
@@ -296,13 +298,17 @@ task dist (dependsOn: gaiaskyJar, description: "Compiles the project, creates th
         project.ext.versionFile = file("build/classes/java/main/version").text
         ant.replace(file: "$distDir/README.md", token: "--------------------------", value: "$versionFile")
 
-        // Generate man
-        println("Generate man: $distDir/gaiasky.6.gz")
-        exec {
-            commandLine "help2man", "-N", "--section=6", "--include", "$baseDir/core/man/gaiasky.h2m", "--output=$distDir/gaiasky.6", "$distDir/gaiasky"
-        }
-        exec {
-            commandLine "gzip", "$distDir/gaiasky.6"
+        // Generate man (linux only)
+        if(Os.isFamily(Os.FAMILY_UNIX)) {
+            println("Generate man: $distDir/gaiasky.6.gz")
+            exec {
+                commandLine "help2man", "-N", "--section=6", "--include", "$baseDir/core/man/gaiasky.h2m", "--output=$distDir/gaiasky.6", "$distDir/gaiasky"
+            }
+            exec {
+                commandLine "gzip", "$distDir/gaiasky.6"
+            }
+        } else {
+            println("Skipping generation of man pages")
         }
     }
 }
