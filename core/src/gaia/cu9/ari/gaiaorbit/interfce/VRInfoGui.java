@@ -86,17 +86,17 @@ public class VRInfoGui extends AbstractGui {
     }
 
     @Override
-    public void update(double dt) {
-        super.update(dt);
-    }
-
-    @Override
     protected void rebuildGui() {
         if (ui != null) {
             ui.clear();
             if (container != null)
                 ui.addActor(container);
         }
+    }
+
+    @Override
+    public boolean mustDraw(){
+        return GlobalConf.runtime.DISPLAY_VR_GUI;
     }
 
     @Override

@@ -569,6 +569,11 @@ public enum Events {
     /** Displays VR Controller hints **/
     DISPLAY_VR_CONTROLLER_HINT_CMD,
     /**
+     * Informs of the current selecting state. Contains the state (true|false) and a double in [0,1] with the completion
+     * rate
+     */
+    VR_SELECTING_STATE,
+    /**
      * Informs the UI theme has been reloaded. Contains the new skin.
      */
     UI_THEME_RELOAD_INFO,

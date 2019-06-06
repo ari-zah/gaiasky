@@ -46,7 +46,7 @@ public class VRControllerInfoGui extends AbstractGui {
         float tw = vrctrl_tex.getWidth() * texScale;
         float th = vrctrl_tex.getHeight() * texScale;
 
-        container.padLeft((w - tw) / 2f - hoffset);
+        container.padLeft((w - tw) / 2f + hoffset);
         container.padBottom((h - th) / 2f);
         container.setActor(contents);
         contents.setVisible(false);
@@ -75,7 +75,8 @@ public class VRControllerInfoGui extends AbstractGui {
         }
     }
 
-    public boolean isVisible(){
+    @Override
+    public boolean mustDraw(){
         return contents != null && contents.isVisible();
     }
 

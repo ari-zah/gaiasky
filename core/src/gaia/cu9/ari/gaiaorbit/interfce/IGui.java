@@ -111,6 +111,12 @@ public interface IGui extends Disposable {
      * @param hoffset
      *            The horizontal offset in pixels
      */
-    public void setHoffset(int hoffset);
+    void setHoffset(int hoffset);
+
+    /**
+     * Returns whether this GUI must be drawn or not
+     * @return Whether this is visible
+     */
+    boolean mustDraw();
 
 }

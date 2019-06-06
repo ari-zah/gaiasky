@@ -138,4 +138,9 @@ public abstract class AbstractGui implements IObserver, IGui {
     public void setHoffset(int hoffset) {
         this.hoffset = hoffset;
     }
+
+    @Override
+    public boolean mustDraw() {
+        return true;
+    }
 }

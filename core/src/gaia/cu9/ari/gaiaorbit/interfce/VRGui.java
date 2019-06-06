@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import gaia.cu9.ari.gaiaorbit.render.ComponentTypes;
 import gaia.cu9.ari.gaiaorbit.scenegraph.ISceneGraph;
+import gaia.cu9.ari.gaiaorbit.util.GlobalConf;
 import gaia.cu9.ari.gaiaorbit.util.Logger;
 
 public class VRGui<T extends IGui> implements IGui {
@@ -46,6 +47,7 @@ public class VRGui<T extends IGui> implements IGui {
 
     @Override
     public void update(double dt) {
+        setHoffset((int)(GlobalConf.screen.SCREEN_WIDTH / 5f));
         right.update(dt);
         left.update(dt);
     }
@@ -103,4 +105,8 @@ public class VRGui<T extends IGui> implements IGui {
         left.setHoffset(hoffset);
     }
 
+    @Override
+    public boolean mustDraw(){
+        return right.mustDraw() || left.mustDraw();
+    }
 }

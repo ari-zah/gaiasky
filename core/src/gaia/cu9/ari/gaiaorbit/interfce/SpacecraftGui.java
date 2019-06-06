@@ -616,6 +616,7 @@ public class SpacecraftGui extends AbstractGui {
         rebuildGui();
     }
 
+
     @Override
     public void notify(Events event, Object... data) {
         switch (event) {
