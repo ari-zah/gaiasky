@@ -75,9 +75,9 @@ public class NaturalControllerListener implements ControllerListener, IObserver 
         } else if (buttonCode == mappings.getButtonVelocityMultiplierTenth()) {
             cam.setGamepadMultiplier(0.1);
         } else if (buttonCode == mappings.getButtonVelocityUp()) {
-            cam.setVelocity(1);
+            cam.setVelocityGamepad(1);
         } else if (buttonCode == mappings.getButtonVelocityDown()) {
-            cam.setVelocity(-1);
+            cam.setVelocityGamepad(-1);
         }
         cam.setInputByController(true);
 
@@ -95,9 +95,9 @@ public class NaturalControllerListener implements ControllerListener, IObserver 
         } else if (buttonCode == mappings.getButtonVelocityMultiplierTenth()) {
             cam.setGamepadMultiplier(1);
         } else if (buttonCode == mappings.getButtonVelocityUp()) {
-            cam.setVelocity(0);
+            cam.setVelocityGamepad(0);
         } else if (buttonCode == mappings.getButtonVelocityDown()) {
-            cam.setVelocity(0);
+            cam.setVelocityGamepad(0);
         }
         cam.setInputByController(true);
 
@@ -142,13 +142,13 @@ public class NaturalControllerListener implements ControllerListener, IObserver 
         } else if (axisCode == mappings.getAxisMove()) {
             if (Math.abs(value) < 0.005)
                 value = 0;
-            cam.setVelocity(value);
+            cam.setVelocityGamepad(value);
             treated = true;
         } else if (axisCode == mappings.getAxisVelocityUp()) {
-            cam.setVelocity((value + 1f) / 2.0f);
+            cam.setVelocityGamepad((value + 1f) / 2.0f);
             treated = true;
         } else if (axisCode == mappings.getAxisVelocityDown()) {
-            cam.setVelocity(-(value + 1f) / 2.0f);
+            cam.setVelocityGamepad(-(value + 1f) / 2.0f);
             treated = true;
         }
 

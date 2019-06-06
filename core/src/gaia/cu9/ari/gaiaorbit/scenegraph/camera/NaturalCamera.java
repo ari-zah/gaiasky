@@ -133,13 +133,16 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     private float firstAngl = 0;
 
     /**
-     * Velocity module, in case it comes from a game pad
+     * Velocity module, in case it comes from a game pad.
+     * Sets velocity in the direction of the direction vector
      **/
     private double velocityGamepad = 0;
     private double gamepadMultiplier = 1;
     /** VR velocity vectors **/
     private Vector3 velocityVR0, velocityVR1;
-    /** Magnitude of velocityVR vector **/
+    /** Magnitude of velocityVR vector. Sets the velocity in the direction
+     * of the VR controller
+     **/
     private double velocityVR = 0;
 
     /**
@@ -149,8 +152,6 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     boolean inputByController = false;
 
     boolean diverted = false;
-
-    private float planetariumFocusAngle = 0f;
 
     public double[] hudScales;
     public Color[] hudColors;
@@ -281,6 +282,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
 
     private void camUpdate(double dt, ITimeFrameProvider time) {
         inputController.updateKeys();
+        openVRListener.update();
 
         // The whole update thread must lock the value of direction and up
         distance = pos.len();
@@ -508,7 +510,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
      *
      * @param amount The amount in [-1, 1].
      */
-    public void setVelocity(double amount) {
+    public void setVelocityGamepad(double amount) {
         velocityGamepad = amount;
     }
 
@@ -523,7 +525,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
      */
     public void setVelocityVR(Vector3 p0, Vector3 p1, double amount) {
         if (getMode() == CameraMode.Focus) {
-            setVelocity(amount);
+            setVelocityGamepad(amount);
         } else {
             velocityVR0 = p0;
             velocityVR1 = p1;
@@ -535,7 +537,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
      * Clears the velocityVR vector
      */
     public void clearVelocityVR() {
-        setVelocity(0);
+        setVelocityGamepad(0);
         velocityVR0 = null;
         velocityVR1 = null;
         velocityVR = 0;

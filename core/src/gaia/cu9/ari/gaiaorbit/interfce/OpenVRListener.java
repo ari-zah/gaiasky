@@ -37,14 +37,16 @@ public class OpenVRListener implements VRDeviceListener {
     private boolean vrInfoGui = false;
     private long lastDoublePress = 0l;
 
+    private long lastAxisMovedFrame = Long.MIN_VALUE;
+
     private Set<Integer> pressedButtons;
 
     public OpenVRListener(NaturalCamera cam) {
         this.cam = cam;
-        this.comp = new ViewAngleComparator<IFocus>();
+        this.comp = new ViewAngleComparator<>();
         this.p0 = new Vector3d();
         this.p1 = new Vector3d();
-        pressedButtons = new HashSet<Integer>();
+        pressedButtons = new HashSet<>();
     }
 
     private void lazyInit() {
@@ -69,6 +71,14 @@ public class OpenVRListener implements VRDeviceListener {
      */
     private boolean isPressed(int button) {
         return pressedButtons.contains(button);
+    }
+
+
+    public void update(){
+        long currentFrame = GaiaSky.instance.frames;
+        if(currentFrame - lastAxisMovedFrame > 1){
+            cam.clearVelocityVR();
+        }
     }
 
     /**
@@ -139,6 +149,7 @@ public class OpenVRListener implements VRDeviceListener {
                 CameraMode cm = cam.getMode().equals(CameraMode.Focus) ? CameraMode.Free_Camera : CameraMode.Focus;
                 // Stop
                 cam.clearVelocityVR();
+
                 EventManager.instance.post(Events.CAMERA_MODE_CMD, cm);
             }
         }
@@ -222,6 +233,7 @@ public class OpenVRListener implements VRDeviceListener {
             if (sm != null) {
                 cam.setVelocityVR(sm.getBeamP0(), sm.getBeamP1(), valueY);
             }
+            lastAxisMovedFrame = GaiaSky.instance.frames;
 
             break;
         }
