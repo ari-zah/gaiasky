@@ -54,50 +54,80 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
 
     private static final double MIN_DIST = 5 * Constants.M_TO_U;
 
-    /** VR offset **/
+    /**
+     * VR offset
+     **/
     public Vector3d vroffset;
 
-    /** VR position = pos + vroffset **/
+    /**
+     * VR position = pos + vroffset
+     **/
     public Vector3d vrpos;
 
-    /** Acceleration and velocity **/
+    /**
+     * Acceleration and velocity
+     **/
     public Vector3d accel, vel, posbak;
-    /** The force acting on the entity and the friction **/
+    /**
+     * The force acting on the entity and the friction
+     **/
     private Vector3d force, friction;
 
     public Vector3d direction, up, focusDirection;
-    /** Indicates whether the camera is facing the focus or not **/
+    /**
+     * Indicates whether the camera is facing the focus or not
+     **/
     public boolean facingFocus;
 
-    /** Auxiliary double vectors **/
+    /**
+     * Auxiliary double vectors
+     **/
     private Vector3d aux1, aux2, aux3, aux5, aux4, dx;
     private Vector2 aux2f2;
-    /** Auxiliary float vector **/
+    /**
+     * Auxiliary float vector
+     **/
     private Vector3 auxf1;
-    /** Acceleration, velocity and position for pitch, yaw and roll **/
+    /**
+     * Acceleration, velocity and position for pitch, yaw and roll
+     **/
     private Vector3d pitch, yaw, roll;
     /**
      * Acceleration, velocity and position for the horizontal and vertical
      * rotation around the focus
      **/
     private Vector3d horizontal, vertical;
-    /** Time since last forward control issued, in seconds **/
+    /**
+     * Time since last forward control issued, in seconds
+     **/
     private double lastFwdTime = 0d;
-    /** The last forward amount, positive forward, negative backward **/
+    /**
+     * The last forward amount, positive forward, negative backward
+     **/
     private double lastFwdAmount = 0;
-    /** Previous angle in orientation lock **/
+    /**
+     * Previous angle in orientation lock
+     **/
     double previousOrientationAngle = 0;
-    /** Fov value backup **/
+    /**
+     * Fov value backup
+     **/
     float fovBackup;
 
-    /** Thrust which keeps the camera going. Mainly for game pads **/
+    /**
+     * Thrust which keeps the camera going. Mainly for game pads
+     **/
     private double thrust = 0;
     private int thrustDirection = 0;
 
-    /** Info about whether the previous state is saved **/
+    /**
+     * Info about whether the previous state is saved
+     **/
     protected boolean stateSaved = false;
 
-    /** Whether the camera stops after a few seconds or keeps going **/
+    /**
+     * Whether the camera stops after a few seconds or keeps going
+     **/
     private boolean fullStop = true;
 
     /**
@@ -128,7 +158,9 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
 
     private Vector3d desired;
 
-    /** VR mode stuff **/
+    /**
+     * VR mode stuff
+     **/
     private boolean firstAux = true;
     private float firstAngl = 0;
 
@@ -138,9 +170,12 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
      **/
     private double velocityGamepad = 0;
     private double gamepadMultiplier = 1;
-    /** VR velocity vectors **/
+    /**
+     * VR velocity vectors
+     **/
     private Vector3 velocityVR0, velocityVR1;
-    /** Magnitude of velocityVR vector. Sets the velocity in the direction
+    /**
+     * Magnitude of velocityVR vector. Sets the velocity in the direction
      * of the VR controller
      **/
     private double velocityVRX = 0;
@@ -171,7 +206,9 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
      **/
     private NaturalControllerListener controllerListener;
 
-    /** VR listener **/
+    /**
+     * VR listener
+     **/
     private OpenVRListener openVRListener;
 
     private SpriteBatch spriteBatch;
@@ -196,7 +233,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
         camera.far = (float) CAM_FAR;
 
         // init cameras vector
-        cameras = new PerspectiveCamera[] { camera, camLeft, camRight };
+        cameras = new PerspectiveCamera[]{camera, camLeft, camRight};
 
         fovFactor = camera.fieldOfView / 40f;
 
@@ -260,9 +297,9 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
         hudw = sHUD.getWidth();
         hudh = sHUD.getHeight();
 
-        hudScales = new double[] { HUD_SCALE_MIN, HUD_SCALE_MIN + (HUD_SCALE_MAX - HUD_SCALE_MIN) / 3d, HUD_SCALE_MIN + (HUD_SCALE_MAX - HUD_SCALE_MIN) * 2d / 3d };
+        hudScales = new double[]{HUD_SCALE_MIN, HUD_SCALE_MIN + (HUD_SCALE_MAX - HUD_SCALE_MIN) / 3d, HUD_SCALE_MIN + (HUD_SCALE_MAX - HUD_SCALE_MIN) * 2d / 3d};
         hudSprites = new Sprite[hudScales.length];
-        hudColors = new Color[] { Color.WHITE, Color.GREEN, Color.GOLD, Color.LIME, Color.PINK, Color.ORANGE, Color.CORAL, Color.CYAN, Color.FIREBRICK, Color.FOREST };
+        hudColors = new Color[]{Color.WHITE, Color.GREEN, Color.GOLD, Color.LIME, Color.PINK, Color.ORANGE, Color.CORAL, Color.CYAN, Color.FIREBRICK, Color.FOREST};
 
         for (int i = 0; i < hudScales.length; i++) {
             hudSprites[i] = new Sprite(sHUD);
@@ -291,114 +328,113 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
         double realTransUnits = getTranslateUnits();
         double translateUnits = Math.max(10d * Constants.M_TO_U, realTransUnits);
         switch (m) {
-        case Focus:
-            if (focus != null && focus.withinMagLimit() && !focus.isCoordinatesTimeOverflow()) {
-                focusBak = focus;
-                focus.getAbsolutePosition(aux4);
-                // Hack, fix this by understanding underlying problem
-                if (!aux4.hasNaN()) {
-                    focusPos.set(aux4);
-                }
-                dx.set(0, 0, 0);
+            case Focus:
+                if (focus != null && focus.withinMagLimit() && !focus.isCoordinatesTimeOverflow()) {
+                    focusBak = focus;
+                    focus.getAbsolutePosition(aux4);
+                    // Hack, fix this by understanding underlying problem
+                    if (!aux4.hasNaN()) {
+                        focusPos.set(aux4);
+                    }
+                    dx.set(0, 0, 0);
 
-                if (GlobalConf.scene.FOCUS_LOCK) {
+                    if (GlobalConf.scene.FOCUS_LOCK) {
 
-                    focus.getPredictedPosition(aux1, time, this, false);
-                    // Get focus dx
-                    dx.set(aux1).sub(focusPos);
+                        focus.getPredictedPosition(aux1, time, this, false);
+                        // Get focus dx
+                        dx.set(aux1).sub(focusPos);
 
-                    // Lock orientation - FOR NOW THIS ONLY WORKS WITH
-                    // PLANETS/MOONS
-                    if (GlobalConf.scene.FOCUS_LOCK_ORIENTATION && time.getDt() > 0 && focus.getOrientation() != null) {
-                        Double anglebak = null;
-                        RotationComponent rc = focus.getRotationComponent();
-                        if (rc != null) {
-                            // Rotation component present - planets, etc
-                            anglebak = rc.angle;
-                        } else if (focus.getOrientationQuaternion() != null) {
-                            anglebak = focus.getOrientationQuaternion().getPitch();
+                        // Lock orientation - FOR NOW THIS ONLY WORKS WITH
+                        // PLANETS/MOONS
+                        if (GlobalConf.scene.FOCUS_LOCK_ORIENTATION && time.getDt() > 0 && focus.getOrientation() != null) {
+                            Double anglebak = null;
+                            RotationComponent rc = focus.getRotationComponent();
+                            if (rc != null) {
+                                // Rotation component present - planets, etc
+                                anglebak = rc.angle;
+                            } else if (focus.getOrientationQuaternion() != null) {
+                                anglebak = focus.getOrientationQuaternion().getPitch();
+                            }
+                            if (anglebak != null) {
+                                Double angle = previousOrientationAngle != 0 ? (anglebak - previousOrientationAngle) : 0;
+                                // aux5 <- focus (future) position
+                                focus.getAbsolutePosition(aux5);
+                                // aux3 <- focus to camera vector
+                                aux3.set(pos).sub(aux5);
+                                // aux2 <- spin axis
+                                aux2.set(0, 1, 0).mul(focus.getOrientation());
+                                // rotate aux3 around focus spin axis
+                                aux3.rotate(aux2, angle);
+                                // aux3 <- camera pos after rotating
+                                aux3.add(aux5);
+                                // pos <- aux3
+                                pos.set(aux3);
+                                //direction.rotate(aux2, angle);
+                                up.rotate(aux2, angle);
+
+                                previousOrientationAngle = anglebak;
+                            }
+
                         }
-                        if (anglebak != null) {
-                            Double angle = previousOrientationAngle != 0 ? (anglebak - previousOrientationAngle) : 0;
-                            // aux5 <- focus (future) position
-                            focus.getAbsolutePosition(aux5);
-                            // aux3 <- focus to camera vector
-                            aux3.set(pos).sub(aux5);
-                            // aux2 <- spin axis
-                            aux2.set(0, 1, 0).mul(focus.getOrientation());
-                            // rotate aux3 around focus spin axis
-                            aux3.rotate(aux2, angle);
-                            // aux3 <- camera pos after rotating
-                            aux3.add(aux5);
-                            // pos <- aux3
-                            pos.set(aux3);
-                            //direction.rotate(aux2, angle);
-                            up.rotate(aux2, angle);
 
-                            previousOrientationAngle = anglebak;
-                        }
+                        // Add dx to camera position
+                        pos.add(dx);
 
                     }
 
-                    // Add dx to camera position
-                    pos.add(dx);
+                    // Update direction to follow focus and activate custom input
+                    // listener
+                    this.focus.getAbsolutePosition(aux4).add(dx);
 
-                }
-
-                // Update direction to follow focus and activate custom input
-                // listener
-                this.focus.getAbsolutePosition(aux4).add(dx);
-
-                if (!GlobalConf.runtime.OPENVR) {
-                    if (!diverted) {
-                        directionToTarget(dt, aux4, GlobalConf.scene.TURNING_SPEED / (GlobalConf.scene.CINEMATIC_CAMERA ? 1e3f : 1e2f));
-                    } else {
-                        updateRotationFree(dt, GlobalConf.scene.TURNING_SPEED);
+                    if (!GlobalConf.runtime.OPENVR) {
+                        if (!diverted) {
+                            directionToTarget(dt, aux4, GlobalConf.scene.TURNING_SPEED / (GlobalConf.scene.CINEMATIC_CAMERA ? 1e3f : 1e2f));
+                        } else {
+                            updateRotationFree(dt, GlobalConf.scene.TURNING_SPEED);
+                        }
+                        updateRoll(dt, GlobalConf.scene.TURNING_SPEED);
                     }
-                    updateRoll(dt, GlobalConf.scene.TURNING_SPEED);
-                }
 
-                updatePosition(dt, translateUnits, realTransUnits);
-                if (!GlobalConf.runtime.OPENVR)
+                    updatePosition(dt, translateUnits, realTransUnits);
                     updateRotation(dt, aux4);
 
-                // Update focus direction
-                focusDirection.set(aux4).sub(pos).nor();
-                focus = focusBak;
+                    // Update focus direction
+                    focusDirection.set(aux4).sub(pos).nor();
+                    focus = focusBak;
 
-                double dist = aux4.dst(pos);
-                if (dist < focus.getRadius()) {
-                    // aux2 <- focus-cam with a length of radius
-                    aux2.set(pos).sub(aux4).nor().scl(focus.getRadius());
-                    // Correct camera position
-                    pos.set(aux4).add(aux2);
-                }
-
-                EventManager.instance.post(Events.FOCUS_INFO_UPDATED, focus.getDistToCamera() - focus.getRadius(), focus.getViewAngle(), focus.getAlpha(), focus.getDelta(), focus.getAbsolutePosition(aux2).len() - focus.getRadius());
-            } else {
-                EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
-            }
-            break;
-        case Free_Camera:
-            updatePosition(dt, translateUnits, GlobalConf.scene.FREE_CAMERA_TARGET_MODE_ON ? realTransUnits : 1);
-            if (!GlobalConf.runtime.OPENVR) {
-
-                // If target is present, update direction
-                if (freeTargetOn) {
-                    directionToTarget(dt, freeTargetPos, GlobalConf.scene.TURNING_SPEED / (GlobalConf.scene.CINEMATIC_CAMERA ? 1e3f : 1e2f));
-                    if (facingFocus) {
-                        freeTargetOn = false;
+                    double dist = aux4.dst(pos);
+                    if (dist < focus.getRadius()) {
+                        // aux2 <- focus-cam with a length of radius
+                        aux2.set(pos).sub(aux4).nor().scl(focus.getRadius());
+                        // Correct camera position
+                        pos.set(aux4).add(aux2);
                     }
-                }
 
-                // Update direction with pitch, yaw, roll
-                updateRotationFree(dt, GlobalConf.scene.TURNING_SPEED);
-                updateRoll(dt, GlobalConf.scene.TURNING_SPEED);
-            }
-            updateLateral(dt, translateUnits);
-            break;
-        default:
-            break;
+                    EventManager.instance.post(Events.FOCUS_INFO_UPDATED, focus.getDistToCamera() - focus.getRadius(), focus.getViewAngle(), focus.getAlpha(), focus.getDelta(), focus.getAbsolutePosition(aux2).len() - focus.getRadius());
+                } else {
+                    EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
+                }
+                break;
+            case Free_Camera:
+                updatePosition(dt, translateUnits, GlobalConf.scene.FREE_CAMERA_TARGET_MODE_ON ? realTransUnits : 1);
+                if (!GlobalConf.runtime.OPENVR) {
+
+                    // If target is present, update direction
+                    if (freeTargetOn) {
+                        directionToTarget(dt, freeTargetPos, GlobalConf.scene.TURNING_SPEED / (GlobalConf.scene.CINEMATIC_CAMERA ? 1e3f : 1e2f));
+                        if (facingFocus) {
+                            freeTargetOn = false;
+                        }
+                    }
+
+                    // Update direction with pitch, yaw, roll
+                    updateRotationFree(dt, GlobalConf.scene.TURNING_SPEED);
+                    updateRoll(dt, GlobalConf.scene.TURNING_SPEED);
+                }
+                updateLateral(dt, translateUnits);
+                break;
+            default:
+                break;
         }
 
         // Update camera recorder
@@ -518,11 +554,9 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     /**
      * Sets the velocity of the VR controller as a vector. The magnitude of this
      * vector should not be larger than 1
-     * 
-     * @param p0
-     *            Start point of the beam
-     * @param p1
-     *            End point of the beam
+     *
+     * @param p0      Start point of the beam
+     * @param p1      End point of the beam
      * @param amountX Amount in the perpendicular direction of p0-p1
      * @param amountY Amount in the direction of p0-p1
      */
@@ -908,9 +942,9 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
      * Updates the camera direction and up vectors with a gentle turn towards the
      * given target.
      *
-     * @param dt               The current time step
-     * @param target           The position of the target
-     * @param turnVelocity     The velocity at which to turn
+     * @param dt           The current time step
+     * @param target       The position of the target
+     * @param turnVelocity The velocity at which to turn
      */
     private void directionToTarget(double dt, final Vector3d target, double turnVelocity) {
         desired.set(target).sub(pos);
@@ -938,32 +972,32 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     public void updateMode(CameraMode mode, boolean centerFocus, boolean postEvent) {
         InputMultiplexer im = (InputMultiplexer) Gdx.input.getInputProcessor();
         switch (mode) {
-        case Focus:
-            checkFocus();
-        case Free_Camera:
-        case Gaia_Scene:
-            Gdx.app.postRunnable(() -> {
-                // Register input controllers
-                if (!im.getProcessors().contains(inputController, true))
-                    im.addProcessor(im.size(), inputController);
-                // Register controller listener
-                Controllers.clearListeners();
-                GlobalConf.controls.addControllerListener(controllerListener);
-                if (GlobalConf.runtime.OPENVR)
-                    GaiaSky.instance.vrContext.addListener(openVRListener);
-            });
-            break;
-        default:
-            Gdx.app.postRunnable(() -> {
-                // Unregister input controllers
-                im.removeProcessor(inputController);
-                // Unregister controller listener
-                GlobalConf.controls.removeControllerListener(controllerListener);
-                // Remove vr listener
-                if (GlobalConf.runtime.OPENVR)
-                    GaiaSky.instance.vrContext.removeListener(openVRListener);
-            });
-            break;
+            case Focus:
+                checkFocus();
+            case Free_Camera:
+            case Gaia_Scene:
+                Gdx.app.postRunnable(() -> {
+                    // Register input controllers
+                    if (!im.getProcessors().contains(inputController, true))
+                        im.addProcessor(im.size(), inputController);
+                    // Register controller listener
+                    Controllers.clearListeners();
+                    GlobalConf.controls.addControllerListener(controllerListener);
+                    if (GlobalConf.runtime.OPENVR)
+                        GaiaSky.instance.vrContext.addListener(openVRListener);
+                });
+                break;
+            default:
+                Gdx.app.postRunnable(() -> {
+                    // Unregister input controllers
+                    im.removeProcessor(inputController);
+                    // Unregister controller listener
+                    GlobalConf.controls.removeControllerListener(controllerListener);
+                    // Remove vr listener
+                    if (GlobalConf.runtime.OPENVR)
+                        GaiaSky.instance.vrContext.removeListener(openVRListener);
+                });
+                break;
         }
     }
 
@@ -1014,148 +1048,148 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     @Override
     public void notify(Events event, Object... data) {
         switch (event) {
-        case FOCUS_CHANGE_CMD:
-            // Check the type of the parameter: IFocus or String
-            IFocus focus = null;
-            if (data[0] instanceof String) {
-                SceneGraphNode sgn = GaiaSky.instance.sg.getNode((String) data[0]);
-                if (sgn instanceof IFocus) {
-                    focus = (IFocus) sgn;
-                }
-            } else if (data[0] instanceof IFocus) {
-                focus = (IFocus) data[0];
-            }
-            setFocus(focus);
-
-            checkFocus();
-
-            break;
-        case FOV_CHANGED_CMD:
-            float fov = MathUtilsd.clamp((float) data[0], Constants.MIN_FOV, Constants.MAX_FOV);
-
-            for (PerspectiveCamera cam : cameras) {
-                cam.fieldOfView = fov;
-            }
-            fovFactor = camera.fieldOfView / 40f;
-            if (parent.current == this) {
-                EventManager.instance.post(Events.FOV_CHANGE_NOTIFICATION, fov, fovFactor);
-            }
-            break;
-        case PLANETARIUM_CMD:
-            boolean state = (boolean) data[0];
-            EventManager.instance.post(Events.FISHEYE_CMD, state);
-            if (state) {
-                fovBackup = GaiaSky.instance.cam.getCamera().fieldOfView;
-                EventManager.instance.post(Events.FOV_CHANGED_CMD, 130f);
-                EventManager.instance.post(Events.PLANETARIUM_FOCUS_ANGLE_CMD, 30f);
-            } else {
-                EventManager.instance.post(Events.FOV_CHANGED_CMD, fovBackup);
-                EventManager.instance.post(Events.PLANETARIUM_FOCUS_ANGLE_CMD, 0f);
-            }
-            break;
-        case CAMERA_POS_CMD:
-            pos.set((double[]) data[0]);
-            posinv.set(pos).add(vroffset).scl(-1d);
-            break;
-        case CAMERA_DIR_CMD:
-            direction.set((double[]) data[0]).nor();
-            break;
-        case CAMERA_UP_CMD:
-            up.set((double[]) data[0]).nor();
-            break;
-        case CAMERA_FWD:
-            addForwardForce((double) data[0]);
-            break;
-        case CAMERA_ROTATE:
-            addRotateMovement((double) data[0], (double) data[1], false, true);
-            break;
-        case CAMERA_TURN:
-            addRotateMovement((double) data[0], (double) data[1], true, true);
-            break;
-        case CAMERA_PAN:
-
-            break;
-        case CAMERA_ROLL:
-            addRoll((double) data[0], GlobalConf.scene.CINEMATIC_CAMERA);
-            break;
-        case CAMERA_STOP:
-            stopTotalMovement();
-            break;
-        case CAMERA_CENTER:
-            break;
-        case GO_TO_OBJECT_CMD:
-            if (this.focus != null) {
-                final IFocus f = this.focus;
-                Gdx.app.postRunnable(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Position camera near focus
-                        stopTotalMovement();
-
-                        f.getAbsolutePosition(aux1);
-                        pos.set(aux1);
-
-                        if (GlobalConf.runtime.OPENVR) {
-                            VRContext vrContext = GaiaSky.instance.vrContext;
-                            VRDevice hmd = vrContext.getDeviceByType(VRDeviceType.HeadMountedDisplay);
-                            aux3.set(hmd.getDirection(Space.Tracker));
-                        } else {
-                            aux3.set(0, 0, -1);
-                        }
-                        aux2.set(aux3).scl(-f.getSize() * 3);
-                        pos.add(aux2);
-                        posinv.set(pos).add(vroffset).scl(-1);
-                        direction.set(aux3);
-                        up.set(0, 1, 0);
-                        rotate(up, 0.01);
+            case FOCUS_CHANGE_CMD:
+                // Check the type of the parameter: IFocus or String
+                IFocus focus = null;
+                if (data[0] instanceof String) {
+                    SceneGraphNode sgn = GaiaSky.instance.sg.getNode((String) data[0]);
+                    if (sgn instanceof IFocus) {
+                        focus = (IFocus) sgn;
                     }
-
-                });
-
-            }
-            break;
-        case ORIENTATION_LOCK_CMD:
-            previousOrientationAngle = 0;
-            break;
-        case FREE_MODE_COORD_CMD:
-            float ra = (Float) data[0];
-            float dec = (Float) data[1];
-            float dist = (float) (1e12 * Constants.PC_TO_U);
-            aux1.set(MathUtilsd.degRad * ra, MathUtilsd.degRad * dec, dist);
-            Coordinates.sphericalToCartesian(aux1, freeTargetPos);
-            facingFocus = false;
-            freeTargetOn = true;
-            break;
-        case FOCUS_NOT_AVAILABLE:
-            if (getMode().isFocus()) {
-                boolean found = false;
-                if (data[0] instanceof IFocus) {
+                } else if (data[0] instanceof IFocus) {
                     focus = (IFocus) data[0];
-                    found = isFocus(focus);
-                } else if (data[0] instanceof OctreeWrapper) {
-                    OctreeWrapper octree = (OctreeWrapper) data[0];
-                    OctreeNode octant = this.focus.getOctant();
-                    if (octant != null && octant.getRoot() == octree.root) {
-                        found = true;
+                }
+                setFocus(focus);
+
+                checkFocus();
+
+                break;
+            case FOV_CHANGED_CMD:
+                float fov = MathUtilsd.clamp((float) data[0], Constants.MIN_FOV, Constants.MAX_FOV);
+
+                for (PerspectiveCamera cam : cameras) {
+                    cam.fieldOfView = fov;
+                }
+                fovFactor = camera.fieldOfView / 40f;
+                if (parent.current == this) {
+                    EventManager.instance.post(Events.FOV_CHANGE_NOTIFICATION, fov, fovFactor);
+                }
+                break;
+            case PLANETARIUM_CMD:
+                boolean state = (boolean) data[0];
+                EventManager.instance.post(Events.FISHEYE_CMD, state);
+                if (state) {
+                    fovBackup = GaiaSky.instance.cam.getCamera().fieldOfView;
+                    EventManager.instance.post(Events.FOV_CHANGED_CMD, 130f);
+                    EventManager.instance.post(Events.PLANETARIUM_FOCUS_ANGLE_CMD, 30f);
+                } else {
+                    EventManager.instance.post(Events.FOV_CHANGED_CMD, fovBackup);
+                    EventManager.instance.post(Events.PLANETARIUM_FOCUS_ANGLE_CMD, 0f);
+                }
+                break;
+            case CAMERA_POS_CMD:
+                pos.set((double[]) data[0]);
+                posinv.set(pos).add(vroffset).scl(-1d);
+                break;
+            case CAMERA_DIR_CMD:
+                direction.set((double[]) data[0]).nor();
+                break;
+            case CAMERA_UP_CMD:
+                up.set((double[]) data[0]).nor();
+                break;
+            case CAMERA_FWD:
+                addForwardForce((double) data[0]);
+                break;
+            case CAMERA_ROTATE:
+                addRotateMovement((double) data[0], (double) data[1], false, true);
+                break;
+            case CAMERA_TURN:
+                addRotateMovement((double) data[0], (double) data[1], true, true);
+                break;
+            case CAMERA_PAN:
+
+                break;
+            case CAMERA_ROLL:
+                addRoll((double) data[0], GlobalConf.scene.CINEMATIC_CAMERA);
+                break;
+            case CAMERA_STOP:
+                stopTotalMovement();
+                break;
+            case CAMERA_CENTER:
+                break;
+            case GO_TO_OBJECT_CMD:
+                if (this.focus != null) {
+                    final IFocus f = this.focus;
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Position camera near focus
+                            stopTotalMovement();
+
+                            f.getAbsolutePosition(aux1);
+                            pos.set(aux1);
+
+                            if (GlobalConf.runtime.OPENVR) {
+                                VRContext vrContext = GaiaSky.instance.vrContext;
+                                VRDevice hmd = vrContext.getDeviceByType(VRDeviceType.HeadMountedDisplay);
+                                aux3.set(hmd.getDirection(Space.Tracker));
+                            } else {
+                                aux3.set(0, 0, -1);
+                            }
+                            aux2.set(aux3).scl(-f.getSize() * 3);
+                            pos.add(aux2);
+                            posinv.set(pos).add(vroffset).scl(-1);
+                            direction.set(aux3);
+                            up.set(0, 1, 0);
+                            rotate(up, 0.01);
+                        }
+
+                    });
+
+                }
+                break;
+            case ORIENTATION_LOCK_CMD:
+                previousOrientationAngle = 0;
+                break;
+            case FREE_MODE_COORD_CMD:
+                float ra = (Float) data[0];
+                float dec = (Float) data[1];
+                float dist = (float) (1e12 * Constants.PC_TO_U);
+                aux1.set(MathUtilsd.degRad * ra, MathUtilsd.degRad * dec, dist);
+                Coordinates.sphericalToCartesian(aux1, freeTargetPos);
+                facingFocus = false;
+                freeTargetOn = true;
+                break;
+            case FOCUS_NOT_AVAILABLE:
+                if (getMode().isFocus()) {
+                    boolean found = false;
+                    if (data[0] instanceof IFocus) {
+                        focus = (IFocus) data[0];
+                        found = isFocus(focus);
+                    } else if (data[0] instanceof OctreeWrapper) {
+                        OctreeWrapper octree = (OctreeWrapper) data[0];
+                        OctreeNode octant = this.focus.getOctant();
+                        if (octant != null && octant.getRoot() == octree.root) {
+                            found = true;
+                        }
+                    }
+                    if (found) {
+                        // Set camera  free
+                        EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
                     }
                 }
-                if (found) {
-                    // Set camera  free
-                    EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
+                break;
+            case TOGGLE_VISIBILITY_CMD:
+                if (getMode().isFocus()) {
+                    ComponentType ct = ComponentType.getFromKey((String) data[0]);
+                    if (this.focus != null && ct != null && this.focus.getCt().isEnabled(ct)) {
+                        // Set camera  free
+                        EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
+                    }
                 }
-            }
-            break;
-        case TOGGLE_VISIBILITY_CMD:
-            if(getMode().isFocus()){
-                ComponentType ct = ComponentType.getFromKey((String) data[0]);
-                if(this.focus != null && ct != null && this.focus.getCt().isEnabled(ct)){
-                    // Set camera  free
-                    EventManager.instance.post(Events.CAMERA_MODE_CMD, CameraMode.Free_Camera);
-                }
-            }
-            break;
-        default:
-            break;
+                break;
+            default:
+                break;
         }
 
     }
@@ -1216,7 +1250,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
 
     @Override
     public PerspectiveCamera[] getFrontCameras() {
-        return new PerspectiveCamera[] { camera };
+        return new PerspectiveCamera[]{camera};
     }
 
     @Override
@@ -1245,7 +1279,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
 
     @Override
     public Vector3d[] getDirections() {
-        return new Vector3d[] { direction };
+        return new Vector3d[]{direction};
     }
 
     @Override
