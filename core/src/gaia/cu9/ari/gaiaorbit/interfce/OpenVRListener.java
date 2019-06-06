@@ -231,7 +231,7 @@ public class OpenVRListener implements VRDeviceListener {
             // Joystick for forward/backward movement
             sm = vrDeviceToModel.get(device);
             if (sm != null) {
-                cam.setVelocityVR(sm.getBeamP0(), sm.getBeamP1(), valueY);
+                cam.setVelocityVR(sm.getBeamP0(), sm.getBeamP1(), valueX, valueY);
             }
             lastAxisMovedFrame = GaiaSky.instance.frames;
 

@@ -143,7 +143,8 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
     /** Magnitude of velocityVR vector. Sets the velocity in the direction
      * of the VR controller
      **/
-    private double velocityVR = 0;
+    private double velocityVRX = 0;
+    private double velocityVRY = 0;
 
     /**
      * Holds whether the last input was issued by a controller. Useful to keep
@@ -522,14 +523,17 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
      *            Start point of the beam
      * @param p1
      *            End point of the beam
+     * @param amountX Amount in the perpendicular direction of p0-p1
+     * @param amountY Amount in the direction of p0-p1
      */
-    public void setVelocityVR(Vector3 p0, Vector3 p1, double amount) {
+    public void setVelocityVR(Vector3 p0, Vector3 p1, double amountX, double amountY) {
         if (getMode() == CameraMode.Focus) {
-            setVelocityGamepad(amount);
+            setVelocityGamepad(amountY);
         } else {
             velocityVR0 = p0;
             velocityVR1 = p1;
-            velocityVR = amount;
+            velocityVRX = amountX;
+            velocityVRY = amountY;
         }
     }
 
@@ -540,7 +544,8 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
         setVelocityGamepad(0);
         velocityVR0 = null;
         velocityVR1 = null;
-        velocityVR = 0;
+        velocityVRX = 0;
+        velocityVRY = 0;
     }
 
     /**
@@ -743,8 +748,15 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
         // Calculate velocity if coming from gamepad
         if (velocityGamepad != 0) {
             vel.set(direction).nor().scl(velocityGamepad * gamepadMultiplier * multiplier);
-        } else if (velocityVR != 0) {
-            vel.set(velocityVR1).sub(velocityVR0).nor().scl(velocityVR * gamepadMultiplier * multiplier);
+        } else if (velocityVRX != 0 || velocityVRY != 0) {
+            aux1.set(velocityVR1).sub(velocityVR0).nor();
+
+            // p0-p1 direction (Y)
+            vel.set(aux1).scl(velocityVRY * gamepadMultiplier * multiplier);
+
+            // cross(p0,p1) direction (X)
+            aux1.crs(up).nor().scl(velocityVRX * gamepadMultiplier * multiplier);
+            vel.add(aux1);
         }
 
         double forceLen = force.len();
@@ -758,7 +770,7 @@ public class NaturalCamera extends AbstractCamera implements IObserver {
 
         force.add(friction);
 
-        if (lastFwdTime > (GlobalConf.scene.CINEMATIC_CAMERA ? 1.5 : 0.25) && velocityGamepad == 0 && velocityVR == 0 && fullStop || lastFwdAmount > 0 && transUnits == 0) {
+        if (lastFwdTime > (GlobalConf.scene.CINEMATIC_CAMERA ? 1.5 : 0.25) && velocityGamepad == 0 && velocityVRX == 0 && velocityVRY == 0 && fullStop || lastFwdAmount > 0 && transUnits == 0) {
             stopForwardMovement();
         }
 
