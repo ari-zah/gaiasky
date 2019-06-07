@@ -1184,7 +1184,7 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
 
     private void buildGlowData() {
         if (glowFb == null) {
-            float glowFbScale = 1f;
+            float glowFbScale = 1.4f;
             glowFb = new FrameBuffer(Format.RGBA8888, (int) (GlobalConf.screen.SCREEN_WIDTH * glowFbScale), (int) (GlobalConf.screen.SCREEN_HEIGHT * glowFbScale), false);
         }
     }

@@ -55,13 +55,13 @@ public class GaiaSkyDesktop implements IObserver {
     private static final Log logger = Logger.getLogger(GaiaSkyDesktop.class);
 
     /*
-    * Configuration file version of the source code
-    * This is usually tag where each chunk takes 2 spaces.
-    * Version = major.minor.rev -> 1.2.5 major=1; minor=2; rev=5
-    * Version = major * 10000 + minor * 100 + rev
-    * So 1.2.5 -> 010205
-    *    2.1.7 -> 020107
-    */
+     * Configuration file version of the source code
+     * This is usually tag where each chunk takes 2 spaces.
+     * Version = major.minor.rev -> 1.2.5 major=1; minor=2; rev=5
+     * Version = major * 10000 + minor * 100 + rev
+     * So 1.2.5 -> 010205
+     *    2.1.7 -> 020107
+     */
     public static int SOURCE_CONF_VERSION = 020200;
     private static GaiaSkyDesktop gsd;
     private static boolean REST_ENABLED = false;
@@ -75,17 +75,23 @@ public class GaiaSkyDesktop implements IObserver {
      * @author Toni Sagrista
      */
     private static class GaiaSkyArgs {
-        @Parameter(names = { "-h", "--help" }, description = "Show program options and usage information", help = true, order = 0) private boolean help = false;
+        @Parameter(names = {"-h", "--help"}, description = "Show program options and usage information", help = true, order = 0)
+        private boolean help = false;
 
-        @Parameter(names = { "-v", "--version" }, description = "List Gaia Sky version and relevant information.", order = 1) private boolean version = false;
+        @Parameter(names = {"-v", "--version"}, description = "List Gaia Sky version and relevant information.", order = 1)
+        private boolean version = false;
 
-        @Parameter(names = { "-d", "--ds-download" }, description = "Display the data download dialog at startup. If no data is found, the download dialog is shown automatically.", order = 2) private boolean download = false;
+        @Parameter(names = {"-d", "--ds-download"}, description = "Display the data download dialog at startup. If no data is found, the download dialog is shown automatically.", order = 2)
+        private boolean download = false;
 
-        @Parameter(names = { "-c", "--cat-chooser" }, description = "Display the catalog chooser dialog at startup. This enables the selection of different available catalogs when Gaia Sky starts.", order = 3) private boolean catalogChooser = false;
+        @Parameter(names = {"-c", "--cat-chooser"}, description = "Display the catalog chooser dialog at startup. This enables the selection of different available catalogs when Gaia Sky starts.", order = 3)
+        private boolean catalogChooser = false;
 
-        @Parameter(names = { "-p", "--properties" }, description = "Specify the location of the properties file.", order = 4) private String propertiesFile = null;
+        @Parameter(names = {"-p", "--properties"}, description = "Specify the location of the properties file.", order = 4)
+        private String propertiesFile = null;
 
-        @Parameter(names = { "-a", "--assets" }, description = "Specify the location of the assets folder. If not present, the default assets location is used.", order = 5) private String assetsLocation = null;
+        @Parameter(names = {"-a", "--assets"}, description = "Specify the location of the assets folder. If not present, the default assets location is used.", order = 5)
+        private String assetsLocation = null;
     }
 
     /**
@@ -171,8 +177,9 @@ public class GaiaSkyDesktop implements IObserver {
 
             // Init global configuration
             ConfInit.initialize(new DesktopConfInit());
-            GlobalConf.screen.SCREEN_WIDTH = 1496;
-            GlobalConf.screen.SCREEN_HEIGHT = 1780;
+            float scale = 1.f;
+            GlobalConf.screen.SCREEN_WIDTH = (int) (1496 * scale);
+            GlobalConf.screen.SCREEN_HEIGHT = (int) (1780 * scale);
 
             // Reinitialize with user-defined locale
             I18n.initialize(Gdx.files.absolute(GlobalConf.ASSETS_LOC + File.separator + "i18n/gsbundle"));
@@ -267,34 +274,34 @@ public class GaiaSkyDesktop implements IObserver {
     @Override
     public void notify(Events event, final Object... data) {
         switch (event) {
-        case SCENE_GRAPH_LOADED:
-            if (REST_ENABLED) {
-                /*
-                 * Notify REST server that GUI is loaded and everything should be in a
-                 * well-defined state
-                 */
-                Method activate;
-                try {
-                    activate = REST_SERVER_CLASS.getMethod("activate");
-                    activate.invoke(null, new Object[0]);
-                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    logger.error(e);
+            case SCENE_GRAPH_LOADED:
+                if (REST_ENABLED) {
+                    /*
+                     * Notify REST server that GUI is loaded and everything should be in a
+                     * well-defined state
+                     */
+                    Method activate;
+                    try {
+                        activate = REST_SERVER_CLASS.getMethod("activate");
+                        activate.invoke(null, new Object[0]);
+                    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        logger.error(e);
+                    }
                 }
-            }
-            break;
-        case DISPOSE:
-            if (REST_ENABLED) {
-                /* Shutdown REST server thread on termination */
-                try {
-                    Method stop = REST_SERVER_CLASS.getMethod("stop");
-                    stop.invoke(null, new Object[0]);
-                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    logger.error(e);
+                break;
+            case DISPOSE:
+                if (REST_ENABLED) {
+                    /* Shutdown REST server thread on termination */
+                    try {
+                        Method stop = REST_SERVER_CLASS.getMethod("stop");
+                        stop.invoke(null, new Object[0]);
+                    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        logger.error(e);
+                    }
                 }
-            }
-            break;
-        default:
-            break;
+                break;
+            default:
+                break;
         }
 
     }

@@ -362,7 +362,7 @@ public class Star extends Particle {
         }
     }
     public float getFuzzyRenderSize(ICamera camera) {
-        return super.getFuzzyRenderSize(camera);
+        return super.getFuzzyRenderSize(camera) * 1.5f;
     }
 
 }
