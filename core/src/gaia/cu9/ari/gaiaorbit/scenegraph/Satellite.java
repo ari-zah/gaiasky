@@ -161,11 +161,11 @@ public abstract class Satellite extends ModelBody {
 
     @Override
     public void setSize(Long size) {
-        super.setSize(size * 2000l);
+        super.setSize(size * 4000l);
     }
 
     @Override
     public void setSize(Double size) {
-        super.setSize(size * 2000d);
+        super.setSize(size * 4000d);
     }
 }
