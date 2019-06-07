@@ -170,7 +170,7 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
             // Camera to left
             updateCamera((NaturalCamera) camera.getCurrent(), camera.getCamera(), 0, false, rc, camnearbak);
 
-            sgr.renderGlowPass(camera);
+            sgr.renderGlowPass(camera, 0);
 
             boolean postproc = postprocessCapture(ppb, fbLeft, rw, rh);
 
@@ -201,7 +201,7 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
             // Camera to right
             updateCamera((NaturalCamera) camera.getCurrent(), camera.getCamera(), 1, false, rc, camnearbak);
 
-            sgr.renderGlowPass(camera);
+            sgr.renderGlowPass(camera, 1);
 
             postproc = postprocessCapture(ppb, fbRight, rw, rh);
 
@@ -232,8 +232,9 @@ public class SGROpenVR extends SGRAbstract implements ISGR, IObserver {
             VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, texRight, null, VR.EVRSubmitFlags_Submit_Default);
 
             /** Render to screen **/
+            com.badlogic.gdx.graphics.Texture screenTex = fbRight.getColorBufferTexture();
             sb.begin();
-            sb.draw(fbLeft.getColorBufferTexture(), 0, 0, rw, rh, 0, 0, fbRight.getWidth(), fbRight.getHeight(), false, true);
+            sb.draw(screenTex, 0, 0, rw, rh, 0, 0, screenTex.getWidth(), screenTex.getHeight(), false, true);
             sb.end();
         }
 

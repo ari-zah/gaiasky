@@ -31,14 +31,8 @@ import java.util.Properties;
 
 /**
  * Desktop GlobalConf initialiser, where the configuration comes from a
-<<<<<<< HEAD
  * global.vr.properties file.
  * 
- * @author tsagrista
-=======
- * global.properties file.
->>>>>>> lwjgl3
- *
  * @author tsagrista
  */
 public class DesktopConfInit extends ConfInit {

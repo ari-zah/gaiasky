@@ -123,7 +123,7 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
 
     // VRContext, may be null
     private VRContext vrContext;
-    
+
     private Array<IRenderable> stars;
 
     private AbstractRenderSystem billboardStarsProc;
@@ -477,7 +477,7 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
                         IRenderable s = renderables.get(i);
                         if (s instanceof Particle) {
                             Particle p = (Particle) s;
-                            if (lightIndex < Glow.N && (GlobalConf.program.CUBEMAP360_MODE || GaiaSky.instance.cam.getDirection().angle(p.translation) < angleEdgeDeg)) {
+                            if (lightIndex < Glow.N && (GlobalConf.program.CUBEMAP360_MODE || GlobalConf.runtime.OPENVR || GaiaSky.instance.cam.getDirection().angle(p.translation) < angleEdgeDeg)) {
                                 Vector3d pos3d = p.translation.put(auxd);
 
                                 // Aberration
@@ -706,7 +706,11 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
         to.fieldOfView = from.fieldOfView;
     }
 
-    public void renderGlowPass(ICamera camera) {
+    public void renderGlowPass(ICamera camera){
+        renderGlowPass(camera, -1);
+    }
+
+    public void renderGlowPass(ICamera camera, int eye) {
         if (GlobalConf.postprocess.POSTPROCESS_LIGHT_SCATTERING && glowFb != null) {
             // Get all billboard stars
             Array<IRenderable> bbstars = render_lists.get(RenderGroup.BILLBOARD_STAR.ordinal());
@@ -752,10 +756,9 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
                 modelBatchOpaque.end();
             }
 
-            if (vrContext != null) {
+            if (vrContext != null && eye >= 0) {
                 copyCamera(camera.getCamera(), camaux);
-                sgrov.renderStubModels(modelBatchOpaque, null, camaux, controllers, 0);
-                sgrov.renderStubModels(modelBatchOpaque, null, camaux, controllers, 1);
+                sgrov.renderStubModels(modelBatchOpaque, null, camaux, controllers, eye);
             }
             controllers.clear();
 
@@ -763,9 +766,12 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
             glowTex = glowFb.getColorBufferTexture();
 
             glowFb.end();
-
         }
 
+    }
+
+    public FrameBuffer getGlowFb(){
+        return glowFb;
     }
 
     private void renderShadowMap(ICamera camera) {
@@ -880,7 +886,7 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
         // In stereo and cubemap modes, the glow pass is rendered in the SGR itself
         if (!GlobalConf.program.STEREOSCOPIC_MODE && !GlobalConf.program.CUBEMAP360_MODE && !GlobalConf.runtime.OPENVR)
             renderGlowPass(camera);
-        
+
         renderMWPrePass(camera);
 
         sgr.render(this, camera, t, rw, rh, fb, ppb);
@@ -1177,8 +1183,10 @@ public class SceneGraphRenderer extends AbstractRenderer implements IProcessRend
     }
 
     private void buildGlowData() {
-        if (glowFb == null)
-            glowFb = new FrameBuffer(Format.RGBA8888, 1080, 720, false);
+        if (glowFb == null) {
+            float glowFbScale = 1f;
+            glowFb = new FrameBuffer(Format.RGBA8888, (int) (GlobalConf.screen.SCREEN_WIDTH * glowFbScale), (int) (GlobalConf.screen.SCREEN_HEIGHT * glowFbScale), false);
+        }
     }
 
     public void updateLineRenderSystem() {
