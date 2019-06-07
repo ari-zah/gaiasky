@@ -159,4 +159,13 @@ public abstract class Satellite extends ModelBody {
         return super.getRotationComponent();
     }
 
+    @Override
+    public void setSize(Long size) {
+        super.setSize(size * 2000l);
+    }
+
+    @Override
+    public void setSize(Double size) {
+        super.setSize(size * 2000d);
+    }
 }
