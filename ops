@@ -1,1 +1,1 @@
-{"version":1,"ops":[{"type":1,"author":{"id":"96b0ca7cd30bb493310f134fed311141138b4461"},"timestamp":1622547560,"title":"Test git-bug","message":"This issue has been created locally using `git bug`.","files":null}]}
+{"version":1,"ops":[{"type":4,"author":{"id":"96b0ca7cd30bb493310f134fed311141138b4461"},"timestamp":1622550149,"status":2}]}
